@@ -385,7 +385,7 @@ async function startLiveEndpointDiscovery(url) {
     epScanStatus.className = 'endpoint-scan-status is-scanning';
     epScanStatus.innerHTML = `
       <div class="endpoint-scan-spinner"></div>
-      <span>Rozpoczynam badanie na żywo kodu strony dla <strong>${host}</strong>...</span>
+      <span>Skanowanie kodu aplikacji i badanie endpointów na żywo dla <strong>${host}</strong>...</span>
     `;
   }
 
@@ -402,7 +402,7 @@ async function startLiveEndpointDiscovery(url) {
           epScanStatus.className = 'endpoint-scan-status is-scanning';
           epScanStatus.innerHTML = `
             <div class="endpoint-scan-spinner"></div>
-            <span>Trwa badanie na żywo: sprawdzono <strong>${current}</strong> z <strong>${total}</strong> rzeczywistych ścieżek...</span>
+            <span>Badanie na żywo: sprawdzono <strong>${current}</strong> z <strong>${total}</strong> ścieżek kodu...</span>
           `;
         }
       }
@@ -416,14 +416,14 @@ async function startLiveEndpointDiscovery(url) {
       epScanStatus.className = 'endpoint-scan-status is-finished';
       epScanStatus.innerHTML = `
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--emerald-400); flex-shrink: 0;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        <span>Zakończono analizę na żywo: zbadano <strong>${liveResults.length}</strong> rzeczywistych endpointów serwera (1:1 bez zamockowanych danych).</span>
+        <span>Zakończono analizę: zbadano <strong>${liveResults.length}</strong> wykrytych endpointów serwera.</span>
       `;
     }
   } catch (err) {
     console.error('Live crawl error:', err);
     if (epScanStatus) {
       epScanStatus.className = 'endpoint-scan-status';
-      epScanStatus.innerHTML = `<span>Zbadano dostępne endpointy serwera.</span>`;
+      epScanStatus.innerHTML = `<span>Zakończono analizę endpointów serwera.</span>`;
     }
   }
 }

@@ -152,52 +152,8 @@ function buildAuditPayload(url, perfScore, seoScore, secScore, uxScore, m, hash 
       mobileSpeedStatus: perfScore >= 85 ? 'Szybka (Zgodna z normami Google)' : 'Wymaga optymalizacji na urządzeniach mobilnych'
     },
     checklist: generateChecklist(perfScore, seoScore, isHttps),
-    endpoints: generateAutoEndpoints(url, hash)
+    endpoints: []
   };
-}
-
-function generateAutoEndpoints(url, hash = 12345) {
-  const base = url.replace(/\/+$/, '');
-
-  return [
-    // 1. Główne trasy i podstrony (Routing / Pages)
-    { path: '/', fullUrl: `${base}/`, category: 'Routing', status: 200, statusText: 'OK', latency: 25 + (hash % 20), type: 'text/html', desc: 'Strona główna serwisu' },
-    { path: '/download', fullUrl: `${base}/download`, category: 'Routing', status: (hash % 7 === 0 ? 404 : 200), statusText: (hash % 7 === 0 ? 'NOT FOUND' : 'OK'), latency: 35 + (hash % 30), type: 'text/html', desc: 'Sekcja pobierania plików i oprogramowania' },
-    { path: '/check', fullUrl: `${base}/check`, category: 'Routing', status: 200, statusText: 'OK', latency: 40 + (hash % 25), type: 'text/html', desc: 'Narzędzie sprawdzania wersji i statusu' },
-    { path: '/kontakt', fullUrl: `${base}/kontakt`, category: 'Routing', status: 200, statusText: 'OK', latency: 38 + (hash % 30), type: 'text/html', desc: 'Formularz kontaktowy i dane firmy' },
-    { path: '/about', fullUrl: `${base}/about`, category: 'Routing', status: (hash % 3 === 0 ? 200 : 301), statusText: (hash % 3 === 0 ? 'OK' : 'MOVED'), latency: 30 + (hash % 20), type: 'text/html', desc: 'Informacje o projekcie i autorach' },
-    { path: '/pricing', fullUrl: `${base}/pricing`, category: 'Routing', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 42 + (hash % 35), type: 'text/html', desc: 'Cennik usług i subskrypcje' },
-    { path: '/blog', fullUrl: `${base}/blog`, category: 'Routing', status: 200, statusText: 'OK', latency: 45 + (hash % 40), type: 'text/html', desc: 'Artykuły, poradniki i aktualności' },
-    { path: '/login', fullUrl: `${base}/login`, category: 'Routing', status: 200, statusText: 'OK', latency: 32 + (hash % 25), type: 'text/html', desc: 'Panel logowania użytkownika' },
-    { path: '/regulamin', fullUrl: `${base}/regulamin`, category: 'Routing', status: 200, statusText: 'OK', latency: 30 + (hash % 25), type: 'text/html', desc: 'Warunki korzystania z serwisu' },
-    { path: '/polityka-prywatnosci', fullUrl: `${base}/polityka-prywatnosci`, category: 'Routing', status: 200, statusText: 'OK', latency: 28 + (hash % 20), type: 'text/html', desc: 'Informacje o RODO i przetwarzaniu danych' },
-
-    // 2. REST API & GraphQL
-    { path: '/api/health', fullUrl: `${base}/api/health`, category: 'API', status: 200, statusText: 'OK', latency: 22 + (hash % 18), type: 'application/json', desc: 'Status zdrowia serwera i mikroserwisów' },
-    { path: '/api/v1', fullUrl: `${base}/api/v1`, category: 'API', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 55 + (hash % 45), type: 'application/json', desc: 'Główny punkt wejściowy API v1' },
-    { path: '/api/v2', fullUrl: `${base}/api/v2`, category: 'API', status: (hash % 4 === 0 ? 200 : 404), statusText: (hash % 4 === 0 ? 'OK' : 'NOT FOUND'), latency: 50 + (hash % 40), type: 'application/json', desc: 'Wersja v2 nowoczesnego REST API' },
-    { path: '/api/status', fullUrl: `${base}/api/status`, category: 'API', status: 200, statusText: 'OK', latency: 25 + (hash % 20), type: 'application/json', desc: 'Statystyki obciążenia serwera i bazy danych' },
-    { path: '/api/auth', fullUrl: `${base}/api/auth`, category: 'API', status: 200, statusText: 'OK', latency: 60 + (hash % 40), type: 'application/json', desc: 'Endpoint autoryzacji sesji i tokenów JWT' },
-    { path: '/api/config', fullUrl: `${base}/api/config`, category: 'API', status: 200, statusText: 'OK', latency: 35 + (hash % 25), type: 'application/json', desc: 'Konfiguracja publicznych parametrów aplikacji' },
-    { path: '/graphql', fullUrl: `${base}/graphql`, category: 'API', status: (hash % 5 === 0 ? 200 : 404), statusText: (hash % 5 === 0 ? 'OK' : 'NOT FOUND'), latency: 70 + (hash % 50), type: 'application/json', desc: 'Endpoint zapytań GraphQL' },
-    { path: '/wp-json/', fullUrl: `${base}/wp-json/`, category: 'API', status: (hash % 6 === 0 ? 200 : 404), statusText: (hash % 6 === 0 ? 'OK' : 'NOT FOUND'), latency: 85 + (hash % 60), type: 'application/json', desc: 'Interfejs WordPress REST API' },
-
-    // 3. SEO & Indeksacja wyszukiwarek
-    { path: '/robots.txt', fullUrl: `${base}/robots.txt`, category: 'SEO', status: 200, statusText: 'OK', latency: 20 + (hash % 15), type: 'text/plain', desc: 'Instrukcje indeksacji dla Googlebota' },
-    { path: '/sitemap.xml', fullUrl: `${base}/sitemap.xml`, category: 'SEO', status: 200, statusText: 'OK', latency: 45 + (hash % 35), type: 'application/xml', desc: 'Główna mapa linków XML serwisu' },
-    { path: '/sitemap_index.xml', fullUrl: `${base}/sitemap_index.xml`, category: 'SEO', status: (hash % 3 === 0 ? 200 : 404), statusText: (hash % 3 === 0 ? 'OK' : 'NOT FOUND'), latency: 50 + (hash % 40), type: 'application/xml', desc: 'Indeks wieloczęściowych map witryny' },
-    { path: '/feed', fullUrl: `${base}/feed`, category: 'SEO', status: 200, statusText: 'OK', latency: 40 + (hash % 30), type: 'application/rss+xml', desc: 'Kanał syndykacji treści RSS/Atom' },
-
-    // 4. Bezpieczeństwo & RFC Konfiguracja
-    { path: '/.well-known/security.txt', fullUrl: `${base}/.well-known/security.txt`, category: 'Security', status: 200, statusText: 'OK', latency: 28 + (hash % 20), type: 'text/plain', desc: 'Polityka raportowania podatności (RFC 9116)' },
-    { path: '/.well-known/assetlinks.json', fullUrl: `${base}/.well-known/assetlinks.json`, category: 'Security', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 32 + (hash % 22), type: 'application/json', desc: 'Weryfikacja powiązania z aplikacją Android' },
-    { path: '/.well-known/apple-app-site-association', fullUrl: `${base}/.well-known/apple-app-site-association`, category: 'Security', status: (hash % 3 === 0 ? 200 : 404), statusText: (hash % 3 === 0 ? 'OK' : 'NOT FOUND'), latency: 34 + (hash % 24), type: 'application/json', desc: 'Konfiguracja Universal Links dla urządzeń Apple iOS' },
-    { path: '/.env', fullUrl: `${base}/.env`, category: 'Security', status: 403, statusText: 'FORBIDDEN', latency: 18 + (hash % 12), type: 'text/plain', desc: 'Ochrona pliku konfiguracyjnego środowiska (Prawidłowo zablokowany)' },
-
-    // 5. Statyczne pliki i assety
-    { path: '/favicon.ico', fullUrl: `${base}/favicon.ico`, category: 'Asset', status: 200, statusText: 'OK', latency: 18 + (hash % 15), type: 'image/x-icon', desc: 'Główna ikona witryny w pasku przeglądarki' },
-    { path: '/manifest.json', fullUrl: `${base}/manifest.json`, category: 'Asset', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 26 + (hash % 18), type: 'application/json', desc: 'Manifest instalacyjny PWA (Progressive Web App)' }
-  ];
 }
 
 export function getCategoryForPath(path) {
@@ -213,15 +169,15 @@ export function getCategoryForPath(path) {
 
 export function getDescForPath(path, status) {
   const p = path.toLowerCase();
-  if (p === '/') return 'Strona główna serwisu (Wykryto 1:1 z kodu strony)';
-  if (p.endsWith('.css')) return 'Arkusz stylów CSS witryny';
-  if (p.endsWith('.js')) return 'Skrypt JavaScript / paczka frontendowa';
-  if (p.includes('robots.txt')) return 'Plik instrukcji indeksowania Googlebot';
-  if (p.includes('sitemap')) return 'Mapa linków witryny XML dla wyszukiwarki';
-  if (p.includes('/api/health')) return 'Health check mikroserwisów i serwera';
-  if (p.includes('/api/')) return 'Endpoint interfejsu REST API';
-  if (p.includes('.env')) return status === 404 || status === 403 ? 'Plik środowiska bezpiecznie zablokowany (403/404)' : 'OSTRZEŻENIE: Plik .env dostępny publicznie!';
-  return 'Endpoint / podstrona zbadana na żywo na serwerze';
+  if (p === '/') return 'Strona główna serwisu';
+  if (p.endsWith('.css') || p.includes('.css?')) return 'Arkusz stylów CSS aplikacji';
+  if (p.endsWith('.js') || p.includes('.js?')) return 'Skrypt JavaScript / paczka frontendowa';
+  if (p.endsWith('.ico') || p.endsWith('.svg') || p.endsWith('.png') || p.endsWith('.webp')) return 'Plik graficzny / ikona aplikacji';
+  if (p.includes('robots.txt')) return status === 200 ? 'Plik indeksacji wyszukiwarek robots.txt' : 'Brak pliku robots.txt na serwerze';
+  if (p.includes('sitemap')) return status === 200 ? 'Mapa witryny sitemap.xml dla wyszukiwarki' : 'Brak mapy sitemap.xml na serwerze';
+  if (p.includes('/api/')) return status === 200 ? 'Aktywny endpoint REST API' : 'Endpoint REST API';
+  if (p.includes('.well-known')) return 'Zasób standardu IETF RFC';
+  return status >= 200 && status < 300 ? 'Wykryta aktywna ścieżka aplikacji' : `Ścieżka aplikacji (status ${status})`;
 }
 
 export async function probeSingleEndpointLive(cleanBase, path) {
@@ -313,58 +269,88 @@ export async function crawlAndProbeLiveEndpoints(baseUrl, onEndpointFound, onPro
     }
   }
 
-  // 2. Ekstrakcja 1:1 wszystkich linków, skryptów, styli i endpointów z kodu
+  // 2. Ekstrakcja linków, skryptów, styli i assetów z kodu HTML
   const candidatePaths = new Set(['/']);
+  const jsBundles = [];
 
   if (html) {
-    // href="..."
-    for (const m of html.matchAll(/href=["']([^"'#\s]+)["']/g)) {
+    // href, src, action z HTML
+    for (const m of html.matchAll(/(?:href|src|action)=["']([^"'#\s>]+)["']/gi)) {
       const val = m[1].trim();
       if (val.startsWith('/') && !val.startsWith('//')) {
-        candidatePaths.add(val.split('?')[0]);
+        const cleanPath = val.split('?')[0];
+        candidatePaths.add(cleanPath);
+        if (cleanPath.endsWith('.js') || cleanPath.includes('.js?')) {
+          jsBundles.push(cleanPath);
+        }
       } else if (val.startsWith(cleanBase)) {
         const rel = val.replace(cleanBase, '').split('?')[0];
-        if (rel.startsWith('/')) candidatePaths.add(rel);
+        if (rel.startsWith('/')) {
+          candidatePaths.add(rel);
+          if (rel.endsWith('.js') || rel.includes('.js?')) jsBundles.push(rel);
+        }
       }
     }
 
-    // src="..."
-    for (const m of html.matchAll(/src=["']([^"'#\s]+)["']/g)) {
-      const val = m[1].trim();
-      if (val.startsWith('/') && !val.startsWith('//')) {
-        candidatePaths.add(val.split('?')[0]);
-      } else if (val.startsWith(cleanBase)) {
-        const rel = val.replace(cleanBase, '').split('?')[0];
-        if (rel.startsWith('/')) candidatePaths.add(rel);
-      }
-    }
-
-    // Next.js / Webpack chunks
-    for (const m of html.matchAll(/(?:static\/chunks|\/_next\/static|assets\/)[^"'\\\s,)]+/g)) {
+    // Next.js chunks, Webpack, Vite assets
+    for (const m of html.matchAll(/(?:\/_next\/static\/(?:chunks|css)\/|_next\/static\/|[a-zA-Z0-9_\-\.\/]+\.(?:js|css))[a-zA-Z0-9_\-\.\/]*/gi)) {
       let p = m[0];
-      if (!p.startsWith('/')) p = '/' + p;
-      candidatePaths.add(p);
-    }
-
-    // Wywołania fetch / API w skryptach
-    for (const m of html.matchAll(/(?:fetch|axios|ajax)\s*\(\s*['"](\/[a-zA-Z0-9_\-\/\.]+)['"]/g)) {
-      candidatePaths.add(m[1]);
+      if (p.includes('.js') || p.includes('.css')) {
+        if (!p.startsWith('/')) p = '/' + p;
+        if (!p.includes('//') && p.length < 120) {
+          candidatePaths.add(p);
+          if (p.endsWith('.js')) jsBundles.push(p);
+        }
+      }
     }
   }
 
-  // Standardowe punkty infrastruktury do zbadania
-  const standardInfra = [
-    '/download',
-    '/check',
-    '/robots.txt',
-    '/sitemap.xml',
-    '/favicon.ico',
-    '/api/health',
-    '/api/v1',
-    '/.well-known/security.txt',
-    '/.env'
-  ];
-  for (const p of standardInfra) {
+  // 3. Skanowanie kodu paczek JavaScript aplikacji (SPA / Next.js / React / Vue) w poszukiwaniu API i tras
+  const uniqueJs = [...new Set(jsBundles)].slice(0, 8);
+  for (const jsPath of uniqueJs) {
+    const fullJsUrl = cleanBase + (jsPath.startsWith('/') ? '' : '/') + jsPath;
+    try {
+      let code = '';
+      const jsRes = await fetch(fullJsUrl, { signal: AbortSignal.timeout(4000) });
+      if (jsRes.ok) {
+        code = await jsRes.text();
+      } else {
+        const proxyJs = await fetch(`https://r.jina.ai/${fullJsUrl}`, { signal: AbortSignal.timeout(4000) });
+        if (proxyJs.ok) code = await proxyJs.text();
+      }
+
+      if (code) {
+        // Wykrywanie endpointów API w kodzie aplikacji
+        const apiMatches = code.matchAll(/(?:["'`])(\/api\/[a-zA-Z0-9_\-\/\.]+)(?:["'`])/gi);
+        for (const am of apiMatches) {
+          const apiPath = am[1].split('?')[0];
+          if (apiPath.length < 80) candidatePaths.add(apiPath);
+        }
+
+        // Wykrywanie wywołań sieciowych fetch/axios/ajax w kodzie JS
+        const fetchMatches = code.matchAll(/(?:fetch|axios|get|post|put|delete|patch|ajax)\s*\(\s*["'](\/[a-zA-Z0-9_\-\/\.]+)["']/gi);
+        for (const fm of fetchMatches) {
+          const fPath = fm[1].split('?')[0];
+          if (fPath.length < 80) candidatePaths.add(fPath);
+        }
+
+        // Wykrywanie tras routingu w kodzie aplikacji (React Router, Next Router, Vue Router)
+        const routeMatches = code.matchAll(/(?:push|replace|pathname|href|to|route|path)\s*[:=(]\s*["'](\/[a-zA-Z0-9_\-]+)["']/gi);
+        for (const rm of routeMatches) {
+          const route = rm[1];
+          if (route.length > 1 && !route.startsWith('/_') && route.length < 50) {
+            candidatePaths.add(route);
+          }
+        }
+      }
+    } catch (e) {
+      // pomijamy błąd pobrania paczki JS
+    }
+  }
+
+  // 4. Podstawowe pliki standardu webowego
+  const standardProbes = ['/robots.txt', '/sitemap.xml', '/.well-known/security.txt'];
+  for (const p of standardProbes) {
     candidatePaths.add(p);
   }
 
@@ -374,7 +360,7 @@ export async function crawlAndProbeLiveEndpoints(baseUrl, onEndpointFound, onPro
 
   if (onProgress) onProgress(0, total);
 
-  // 3. Badanie na żywo każdego wykrytego endpointu (concurrency: 3)
+  // 5. Badanie na żywo każdego wykrytego endpointu w puli zapytań (concurrency: 3)
   const results = [];
   const concurrency = 3;
   let index = 0;
