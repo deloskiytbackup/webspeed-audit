@@ -5,8 +5,737 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebSpeed.eu — Błyskawiczny Audyt Stron WWW, Core Web Vitals & SEO</title>
   <meta name="description" content="Niezależne narzędzie do analizy szybkości stron internetowych, Google Core Web Vitals (LCP, FCP, CLS, TTFB) oraz optymalizacji SEO.">
-  <link rel="stylesheet" href="./src/styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <style>
+:root {
+  --background: #08090d;
+  --foreground: #ededed;
+  --card: #16181f;
+  --card-header: #121319;
+  --card-border: #262935;
+  --card-border-hover: #383d4e;
+  --input-bg: #121319;
+  --primary: #3b82f6;
+  --primary-btn: #2563eb;
+  --primary-btn-hover: #1d4ed8;
+  --secondary-btn: #20222c;
+  --secondary-btn-hover: #282a36;
+  --muted: #8b92a5;
+  --zinc-100: #f4f4f5;
+  --zinc-200: #e4e4e7;
+  --zinc-300: #d4d4d8;
+  --zinc-400: #a1a1aa;
+  --zinc-500: #71717a;
+  --zinc-600: #52525b;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --rose-400: #fb7185;
+  --rose-500: #f43f5e;
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+::selection {
+  background-color: var(--primary-btn);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: #2b2e3c;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f4457;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Header matching samfirm.eu */
+header.site-header {
+  width: 100%;
+  border-bottom: 1px solid var(--card-border);
+  background-color: var(--card-header);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-inner {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.logo-text {
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+}
+
+.logo-accent {
+  color: var(--primary);
+}
+
+.badge-version {
+  font-size: 11px;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  background-color: #1f222d;
+  color: var(--zinc-400);
+  font-weight: 500;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.nav-link {
+  color: var(--zinc-400);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.nav-link:hover {
+  color: #ffffff;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding-left: 0.25rem;
+  font-size: 11px;
+  color: var(--emerald-400);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--emerald-500);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.github-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #181a24;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  color: var(--zinc-300);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+
+.github-pill:hover {
+  border-color: var(--card-border-hover);
+  color: #ffffff;
+  background-color: #20222c;
+}
+
+/* Layout container */
+.main-wrapper {
+  flex: 1;
+  max-width: 1024px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 3rem;
+}
+
+/* Hero Section */
+.hero {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .hero-title {
+    font-size: 2.25rem;
+  }
+}
+
+.hero-subtitle {
+  font-size: 0.875rem;
+  color: var(--zinc-400);
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+/* Samfirm Clean Card */
+.clean-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+}
+
+@media (min-width: 640px) {
+  .clean-card {
+    padding: 1.5rem;
+  }
+}
+
+/* Form Styles */
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--zinc-400);
+  margin-bottom: 0.5rem;
+}
+
+.search-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .search-grid {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.clean-input {
+  width: 100%;
+  border: 1px solid var(--card-border);
+  color: #ffffff;
+  background-color: var(--input-bg);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+.clean-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.clean-input::placeholder {
+  color: var(--zinc-500);
+}
+
+.clean-button {
+  color: #ffffff;
+  background-color: var(--primary-btn);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.65rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+}
+
+.clean-button:hover {
+  background-color: var(--primary-btn-hover);
+}
+
+.clean-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.clean-button-secondary {
+  color: #e2e4ea;
+  border: 1px solid var(--card-border);
+  background-color: var(--secondary-btn);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.65rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.clean-button-secondary:hover {
+  background-color: var(--secondary-btn-hover);
+  border-color: var(--card-border-hover);
+  color: #ffffff;
+}
+
+/* Quick presets */
+.presets-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.presets-label {
+  font-size: 11px;
+  color: var(--zinc-400);
+  font-weight: 500;
+}
+
+.preset-chip {
+  font-size: 11px;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  color: var(--zinc-300);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preset-chip:hover {
+  background-color: #20222c;
+  border-color: var(--card-border-hover);
+  color: #ffffff;
+}
+
+/* Loading Box */
+.loading-box {
+  display: none;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  margin-top: 1.5rem;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(59, 130, 246, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.35rem;
+}
+
+.loading-sub {
+  font-size: 12px;
+  color: var(--zinc-500);
+}
+
+/* Results Section */
+.results-container {
+  display: none;
+  margin-top: 2rem;
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Overview Card */
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  .overview-grid {
+    grid-template-columns: 160px 1fr;
+  }
+}
+
+.gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.gauge-circle {
+  width: 140px;
+  height: 140px;
+  transform: rotate(-90deg);
+}
+
+.gauge-bg {
+  fill: none;
+  stroke: #121319;
+  stroke-width: 9;
+}
+
+.gauge-progress {
+  fill: none;
+  stroke-width: 9;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s;
+}
+
+.gauge-text {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.gauge-label {
+  margin-top: 0.5rem;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--zinc-400);
+}
+
+.overview-content h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.02em;
+}
+
+.overview-content p {
+  font-size: 0.85rem;
+  color: var(--zinc-400);
+  margin-bottom: 1rem;
+}
+
+.target-url-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--primary);
+  word-break: break-all;
+}
+
+/* Section headings */
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 2rem 0 0.85rem;
+}
+
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-badge {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--zinc-500);
+}
+
+/* Metrics Grid (Core Web Vitals) */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.15rem;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.metric-card:hover {
+  border-color: var(--card-border-hover);
+  background-color: #1a1c24;
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.metric-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--zinc-400);
+}
+
+.metric-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.metric-val {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.25rem;
+}
+
+.metric-desc {
+  font-size: 11px;
+  color: var(--zinc-500);
+}
+
+/* Checklist Items */
+.checklist-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 0.5rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.checklist-item:last-child {
+  border-bottom: none;
+}
+
+.check-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.check-pass {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: var(--emerald-400);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.check-warn {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: var(--amber-400);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.check-fail {
+  background-color: rgba(244, 63, 94, 0.12);
+  color: var(--rose-400);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+}
+
+.check-content h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.15rem;
+}
+
+.check-content p {
+  font-size: 12px;
+  color: var(--zinc-400);
+}
+
+/* Lead generation banner (Samfirm style) */
+.lead-card {
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 1.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.lead-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb, #38bdf8, #10b981);
+}
+
+.lead-card h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.lead-card p {
+  font-size: 0.875rem;
+  color: var(--zinc-400);
+  max-width: 580px;
+  margin: 0 auto 1.5rem;
+}
+
+.lead-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Footer matching samfirm.eu */
+footer.site-footer {
+  width: 100%;
+  border-top: 1px solid var(--card-border);
+  background-color: var(--card-header);
+  padding: 2rem 1rem;
+  margin-top: 4rem;
+  font-size: 12px;
+  color: var(--zinc-400);
+}
+
+.footer-inner {
+  max-width: 1024px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .footer-inner {
+    flex-direction: row;
+  }
+}
+
+.footer-brand {
+  color: var(--zinc-400);
+}
+
+.footer-brand strong {
+  color: #ffffff;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-links a {
+  color: var(--zinc-400);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.footer-links a:hover {
+  color: #ffffff;
+}
+
+.footer-divider {
+  color: var(--zinc-600);
+}
+  </style>
+  <link rel="stylesheet" href="./src/styles.css">
 </head>
 <body>
   <!-- Header matching samfirm.eu -->
