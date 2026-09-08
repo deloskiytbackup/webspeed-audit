@@ -1,0 +1,22 @@
+{
+  "name": "webspeed-audit",
+  "version": "1.0.0",
+  "description": "Nowoczesne narzędzie do audytu wydajności stron WWW, Core Web Vitals i SEO",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "pagespeed",
+    "seo",
+    "web-performance",
+    "core-web-vitals",
+    "audit",
+    "lighthouse",
+    "frontend"
+  ],
+  "author": "Marcel (deloskiytbackup)",
+  "license": "MIT"
+}

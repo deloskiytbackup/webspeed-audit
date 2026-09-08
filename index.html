@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSpeed & SEO Audit | Darmowy audyt wydajności i Core Web Vitals</title>
+  <meta name="description" content="Błyskawiczny audyt szybkości strony internetowej, Core Web Vitals (LCP, FCP, CLS) oraz SEO. Stworzone przez Marcela (deloskiytbackup).">
+  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="logo">
+        <span>⚡ WebSpeed & SEO Audit</span>
+        <span class="logo-badge">Pro</span>
+      </div>
+      <div class="header-links">
+        <a href="https://github.com/deloskiytbackup/webspeed-audit" target="_blank" rel="noopener noreferrer" class="btn-github">
+          <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1>Sprawdź jak szybko działa Twoja strona</h1>
+      <p>Błyskawiczny audyt Core Web Vitals, wydajności Google PageSpeed i kluczowych elementów SEO technicznego.</p>
+
+      <!-- Formularz audytu -->
+      <form id="audit-form" class="search-box">
+        <input 
+          type="text" 
+          id="url-input" 
+          placeholder="Wpisz adres strony np. www.onet.pl lub twojadomena.pl" 
+          required 
+          autocomplete="off"
+        />
+        <button type="submit" class="btn-audit">Audytuj teraz ⚡</button>
+      </form>
+
+      <!-- Szybkie przykłady -->
+      <div class="presets">
+        <span>Przetestuj na przykładzie:</span>
+        <button type="button" class="preset-chip" data-url="https://onet.pl">onet.pl</button>
+        <button type="button" class="preset-chip" data-url="https://wp.pl">wp.pl</button>
+        <button type="button" class="preset-chip" data-url="https://apple.com">apple.com</button>
+        <button type="button" class="preset-chip" data-url="https://github.com">github.com</button>
+      </div>
+    </section>
+
+    <!-- Stan ładowania -->
+    <div id="loading-box" class="loading-box">
+      <div class="spinner"></div>
+      <h3>Analizuję witrynę pod kątem Core Web Vitals...</h3>
+      <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem;">
+        Pobieranie metryk LCP, CLS, TTFB, zasobów statycznych oraz testów SEO.
+      </p>
+    </div>
+
+    <!-- Wyniki Audytu -->
+    <main id="results-container" class="results-container">
+      <!-- Karta Główna / Overview -->
+      <div class="overview-card">
+        <div class="gauge-container">
+          <svg class="gauge-circle" viewBox="0 0 160 160">
+            <circle class="gauge-bg" cx="80" cy="80" r="68"></circle>
+            <circle id="gauge-progress" class="gauge-progress" cx="80" cy="80" r="68"></circle>
+          </svg>
+          <div id="score-text" class="gauge-text">0</div>
+          <div class="gauge-label">Performance Score</div>
+        </div>
+
+        <div class="overview-summary">
+          <h2>Podsumowanie analizy wydajności</h2>
+          <p>
+            Strona została przetestowana pod kątem szybkości ładowania, optymalizacji skryptów, zasobów CSS/obrazów oraz wskaźników użyteczności Google UX.
+          </p>
+          <div id="target-url-badge" class="target-url-badge">https://example.com</div>
+        </div>
+      </div>
+
+      <!-- Kafelki metryk Core Web Vitals -->
+      <h3 class="section-title">📊 Wskaźniki Core Web Vitals</h3>
+      <div id="metrics-grid" class="metrics-grid"></div>
+
+      <!-- Checklista diagnostyczna SEO & Tech -->
+      <h3 class="section-title">🔍 Diagnostyka techniczna i zalecenia</h3>
+      <div id="checklist-container" class="audit-checklist"></div>
+
+      <!-- Lead Generation Call-To-Action -->
+      <div class="lead-box">
+        <h3>Twoja strona może ładować się 3x szybciej! 🚀</h3>
+        <p>
+          Każda sekunda opóźnienia obniża konwersję o średnio 7% i pogarsza pozycję w wynikach Google.
+          Mogę zoptymalizować Twój kod, obrazy i konfigurację serwera.
+        </p>
+        <div class="lead-actions">
+          <a id="btn-contact" href="mailto:deloskiyt@gmail.com" class="btn-contact">
+            Skontaktuj się ze mną ✉️
+          </a>
+          <button type="button" id="btn-export" class="btn-export">
+            Pobierz raport (.MD) 📄
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <p>
+        Stworzone przez <a href="https://github.com/deloskiytbackup" target="_blank" rel="noopener noreferrer">Marcela (deloskiytbackup)</a> • 
+        Kontakt: <a href="mailto:deloskiyt@gmail.com">deloskiyt@gmail.com</a> | Tel: <a href="tel:+48607396610">+48 607 396 610</a>
+      </p>
+      <p style="margin-top: 0.5rem; font-size: 0.75rem;">
+        Projekt demonstracyjny portfolio • Analiza w oparciu o Google PageSpeed Insights API
+      </p>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>
