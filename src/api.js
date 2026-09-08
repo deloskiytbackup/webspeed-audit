@@ -429,6 +429,84 @@ export async function probeCustomEndpoint(baseUrl, customPath) {
   return probeSingleEndpointLive(cleanBase, customPath);
 }
 
+export async function sendRequestThroughPage(method, url, queryParams, headersJson, bodyText) {
+  let targetUrl = url.trim();
+  if (queryParams && queryParams.trim()) {
+    const q = queryParams.trim().replace(/^\?/, '');
+    targetUrl += (targetUrl.includes('?') ? '&' : '?') + q;
+  }
+
+  let parsedHeaders = {};
+  if (headersJson && headersJson.trim()) {
+    try {
+      parsedHeaders = JSON.parse(headersJson.trim());
+    } catch (e) {}
+  }
+
+  const startTime = performance.now();
+  let status = 0;
+  let statusText = '';
+  let duration = 0;
+  let resText = '';
+  let usedProxy = false;
+  let contentType = '';
+
+  try {
+    const fetchOptions = {
+      method: method || 'GET',
+      headers: parsedHeaders,
+      cache: 'no-cache'
+    };
+    if (bodyText && ['POST', 'PUT', 'PATCH'].includes(method)) {
+      fetchOptions.body = bodyText;
+    }
+
+    const res = await fetch(targetUrl, fetchOptions);
+    duration = Math.round(performance.now() - startTime);
+    status = res.status;
+    statusText = res.statusText || (status === 200 ? 'OK' : '');
+    contentType = res.headers.get('content-type') || '';
+    resText = await res.text();
+  } catch (directErr) {
+    // If direct browser fetch fails (typically CORS restriction), query via CORS proxy
+    try {
+      usedProxy = true;
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+      const proxyRes = await fetch(proxyUrl, {
+        method: method || 'GET',
+        headers: parsedHeaders,
+        cache: 'no-cache',
+        body: (bodyText && ['POST', 'PUT', 'PATCH'].includes(method)) ? bodyText : undefined
+      });
+      duration = Math.round(performance.now() - startTime);
+      status = proxyRes.status;
+      statusText = proxyRes.statusText || 'OK';
+      contentType = proxyRes.headers.get('content-type') || '';
+      resText = await proxyRes.text();
+    } catch (proxyErr) {
+      duration = Math.round(performance.now() - startTime);
+      throw new Error(`Błąd połączenia z serwerem: ${directErr.message}`);
+    }
+  }
+
+  // Format JSON if possible
+  let formattedBody = resText;
+  try {
+    const parsed = JSON.parse(resText);
+    formattedBody = JSON.stringify(parsed, null, 2);
+  } catch (e) {}
+
+  return {
+    status,
+    statusText,
+    duration,
+    body: formattedBody,
+    usedProxy,
+    size: new Blob([resText]).size,
+    contentType
+  };
+}
+
 function getMetricStatus(valStr, goodThresh, poorThresh) {
   const num = parseFloat(valStr);
   if (isNaN(num)) return 'good';

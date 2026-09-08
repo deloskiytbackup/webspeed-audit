@@ -954,6 +954,301 @@ header.site-header {
   border: 1px solid rgba(244, 63, 94, 0.3);
 }
 
+.btn-query-row {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #60a5fa;
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.55rem;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-query-row:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.25);
+}
+
+.endpoint-btn-open-console {
+  background: #181a24;
+  border: 1px solid var(--card-border);
+  color: #60a5fa;
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.75rem;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.endpoint-btn-open-console:hover {
+  border-color: #3b82f6;
+  color: #ffffff;
+  background-color: #202330;
+}
+
+/* Interaktywna Konsola Zapytań HTTP do badania endpointów przez stronę */
+.endpoint-requester-box {
+  background: #111218;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  animation: requesterSlideDown 0.2s ease-out;
+}
+
+@keyframes requesterSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.requester-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.requester-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.requester-close-btn {
+  background: none;
+  border: none;
+  color: var(--zinc-500);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.requester-close-btn:hover {
+  color: #ffffff;
+  background-color: #1e2029;
+}
+
+.requester-bar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.requester-method-select {
+  background: #181a24;
+  border: 1px solid var(--card-border);
+  color: #60a5fa;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--radius-sm);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.requester-method-select:focus {
+  border-color: var(--primary);
+}
+
+.requester-url-input {
+  flex: 1;
+  min-width: 240px;
+  background: #181a24;
+  border: 1px solid var(--card-border);
+  color: #ffffff;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.requester-url-input:focus {
+  border-color: var(--primary);
+}
+
+.requester-btn-send {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #ffffff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.requester-btn-send:hover {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  box-shadow: 0 0 14px rgba(59, 130, 246, 0.4);
+}
+
+.requester-btn-send:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.requester-advanced-toggle {
+  margin-top: 0.6rem;
+}
+
+.requester-toggle-link {
+  background: none;
+  border: none;
+  color: var(--zinc-400);
+  font-size: 11px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.requester-toggle-link:hover {
+  color: #60a5fa;
+}
+
+.requester-advanced-panel {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #14161f;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.requester-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.requester-field-group label {
+  font-size: 11px;
+  color: var(--zinc-400);
+  font-weight: 600;
+}
+
+.requester-text-input, .requester-textarea {
+  background: #0e1017;
+  border: 1px solid var(--card-border);
+  color: #ffffff;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  padding: 0.45rem 0.65rem;
+  border-radius: 4px;
+  outline: none;
+}
+
+.requester-text-input:focus, .requester-textarea:focus {
+  border-color: var(--primary);
+}
+
+.requester-response-box {
+  margin-top: 1rem;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  background: #0b0c10;
+  overflow: hidden;
+}
+
+.response-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: #14161f;
+  border-bottom: 1px solid var(--card-border);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.response-status-info {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.response-meta-item {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  color: var(--zinc-400);
+}
+
+.response-meta-mode {
+  font-size: 10px;
+  color: var(--zinc-500);
+  background: #1d202b;
+  padding: 0.1rem 0.45rem;
+  border-radius: 3px;
+}
+
+.btn-copy-res {
+  background: #1d202b;
+  border: 1px solid var(--card-border);
+  color: var(--zinc-300);
+  font-size: 11px;
+  padding: 0.25rem 0.6rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-copy-res:hover {
+  background: #282c3c;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.response-body-wrapper {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 0.75rem;
+}
+
+.response-code-pre {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #34d399;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 /* Metrics Grid (Core Web Vitals - 6 cards) */
 .metrics-grid {
   display: grid;
@@ -1635,10 +1930,11 @@ footer.site-footer {
         </div>
 
         <div class="endpoint-controls">
-          <!-- Własny próbnik ścieżek -->
+          <!-- Własny próbnik ścieżek & Przycisk Konsoli Zapytań -->
           <div class="endpoint-search-box">
             <input type="text" id="endpoint-custom-input" class="endpoint-input" placeholder="Wpisz dowolną ścieżkę do przetestowania, np. /checkout, /api/users, /dashboard..." />
             <button type="button" id="btn-probe-endpoint" class="endpoint-btn-probe">Zbadaj ścieżkę</button>
+            <button type="button" id="btn-open-console" class="endpoint-btn-open-console" title="Otwórz konsolę zapytań HTTP do testowania endpointów">⚡ Konsola Zapytań HTTP</button>
           </div>
 
           <!-- Filtry kategorii i wyszukiwarka na żywo -->
@@ -1652,6 +1948,78 @@ footer.site-footer {
               <button type="button" class="endpoint-filter-btn" data-filter="Security">Bezpieczeństwo</button>
             </div>
             <input type="text" id="endpoint-search-filter" class="endpoint-filter-search" placeholder="Filtruj listę (np. /api, 200)..." />
+          </div>
+        </div>
+
+        <!-- Interaktywna Konsola Zapytań HTTP do badania endpointów przez stronę -->
+        <div id="endpoint-requester-box" class="endpoint-requester-box" style="display: none;">
+          <div class="requester-header">
+            <div class="requester-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--blue-500);">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span>Konsola zapytań HTTP (Zapytaj endpoint przez naszą stronę)</span>
+            </div>
+            <button type="button" id="btn-close-requester" class="requester-close-btn" title="Zamknij konsolę">✕</button>
+          </div>
+
+          <div class="requester-bar">
+            <select id="req-method" class="requester-method-select">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="HEAD">HEAD</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+            <input type="text" id="req-url" class="requester-url-input" placeholder="Wpisz lub wybierz endpoint do odpytania (np. https://samfirm.eu/api/check)" />
+            <button type="button" id="btn-send-request" class="requester-btn-send">
+              <span>Wyślij zapytanie</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Opcje zaawansowane: parametry / nagłówki / body -->
+          <div class="requester-advanced-toggle">
+            <button type="button" id="btn-toggle-req-advanced" class="requester-toggle-link">
+              <span>Opcje zaawansowane (Query params, Body JSON, Nagłówki)</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <div id="requester-advanced-panel" class="requester-advanced-panel" style="display: none;">
+            <div class="requester-field-group">
+              <label>Parametry URL (Query params, np. model=SM-S928B&region=EUX):</label>
+              <input type="text" id="req-params" class="requester-text-input" placeholder="model=SM-S928B&region=EUX" />
+            </div>
+            <div class="requester-field-group" id="req-body-group" style="display: none;">
+              <label>Treść zapytania (Body JSON dla metod POST/PUT):</label>
+              <textarea id="req-body" class="requester-textarea" rows="3" placeholder='{"key": "value"}'></textarea>
+            </div>
+            <div class="requester-field-group">
+              <label>Własne nagłówki (Format JSON):</label>
+              <input type="text" id="req-headers" class="requester-text-input" placeholder='{"Accept": "application/json"}' />
+            </div>
+          </div>
+
+          <!-- Podgląd odpowiedzi serwera na żywo -->
+          <div id="requester-response-box" class="requester-response-box" style="display: none;">
+            <div class="response-header">
+              <div class="response-status-info">
+                <span id="req-res-badge" class="badge-http badge-http-200">200 OK</span>
+                <span id="req-res-time" class="response-meta-item">⚡ 0 ms</span>
+                <span id="req-res-size" class="response-meta-item">📦 0 B</span>
+                <span id="req-res-mode" class="response-meta-mode">Bezpośrednio</span>
+              </div>
+              <button type="button" id="btn-copy-response" class="btn-copy-res">Kopiuj odpowiedź</button>
+            </div>
+            <div class="response-body-wrapper">
+              <pre id="req-res-body" class="response-code-pre"></pre>
+            </div>
           </div>
         </div>
 
@@ -1773,6 +2141,7 @@ footer.site-footer {
 
       btnExport.addEventListener('click', exportReport);
       setupEndpointProbe();
+      setupEndpointRequester();
       setupCollapsibleSections();
     });
 
@@ -2226,6 +2595,84 @@ footer.site-footer {
     async function probeCustomEndpoint(baseUrl, customPath) {
       const cleanBase = baseUrl.replace(/\/+$/, '');
       return probeSingleEndpointLive(cleanBase, customPath);
+    }
+
+    async function sendRequestThroughPage(method, url, queryParams, headersJson, bodyText) {
+      let targetUrl = url.trim();
+      if (queryParams && queryParams.trim()) {
+        const q = queryParams.trim().replace(/^\?/, '');
+        targetUrl += (targetUrl.includes('?') ? '&' : '?') + q;
+      }
+
+      let parsedHeaders = {};
+      if (headersJson && headersJson.trim()) {
+        try {
+          parsedHeaders = JSON.parse(headersJson.trim());
+        } catch (e) {}
+      }
+
+      const startTime = performance.now();
+      let status = 0;
+      let statusText = '';
+      let duration = 0;
+      let resText = '';
+      let usedProxy = false;
+      let contentType = '';
+
+      try {
+        const fetchOptions = {
+          method: method || 'GET',
+          headers: parsedHeaders,
+          cache: 'no-cache'
+        };
+        if (bodyText && ['POST', 'PUT', 'PATCH'].includes(method)) {
+          fetchOptions.body = bodyText;
+        }
+
+        const res = await fetch(targetUrl, fetchOptions);
+        duration = Math.round(performance.now() - startTime);
+        status = res.status;
+        statusText = res.statusText || (status === 200 ? 'OK' : '');
+        contentType = res.headers.get('content-type') || '';
+        resText = await res.text();
+      } catch (directErr) {
+        // If direct browser fetch fails (typically CORS restriction), query via CORS proxy
+        try {
+          usedProxy = true;
+          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+          const proxyRes = await fetch(proxyUrl, {
+            method: method || 'GET',
+            headers: parsedHeaders,
+            cache: 'no-cache',
+            body: (bodyText && ['POST', 'PUT', 'PATCH'].includes(method)) ? bodyText : undefined
+          });
+          duration = Math.round(performance.now() - startTime);
+          status = proxyRes.status;
+          statusText = proxyRes.statusText || 'OK';
+          contentType = proxyRes.headers.get('content-type') || '';
+          resText = await proxyRes.text();
+        } catch (proxyErr) {
+          duration = Math.round(performance.now() - startTime);
+          throw new Error(`Błąd połączenia z serwerem: ${directErr.message}`);
+        }
+      }
+
+      // Format JSON if possible
+      let formattedBody = resText;
+      try {
+        const parsed = JSON.parse(resText);
+        formattedBody = JSON.stringify(parsed, null, 2);
+      } catch (e) {}
+
+      return {
+        status,
+        statusText,
+        duration,
+        body: formattedBody,
+        usedProxy,
+        size: new Blob([resText]).size,
+        contentType
+      };
     }
 
     function getMetricStatus(valStr, goodThresh, poorThresh) {
@@ -2754,6 +3201,7 @@ footer.site-footer {
         <div class="endpoint-right">
           <span class="endpoint-latency" style="color: ${latencyColor};">⚡ ${ep.latency} ms</span>
           <span class="badge-http ${badgeClass}">${ep.status} ${ep.statusText}</span>
+          <button type="button" class="btn-query-row" title="Wyślij zapytanie do tego endpointu przez naszą stronę">⚡ Zapytaj</button>
           <a href="${ep.fullUrl}" target="_blank" rel="noopener noreferrer" class="endpoint-link" title="Otwórz URL w nowej karcie">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -2763,7 +3211,176 @@ footer.site-footer {
           </a>
         </div>
       `;
+
+      const btnQuery = row.querySelector('.btn-query-row');
+      if (btnQuery) {
+        btnQuery.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openRequesterForUrl(ep.fullUrl, ep.path, ep.category);
+        });
+      }
+
       return row;
+    }
+
+    function setupEndpointRequester() {
+      const requesterBox = document.getElementById('endpoint-requester-box');
+      const btnOpenConsole = document.getElementById('btn-open-console');
+      const btnCloseRequester = document.getElementById('btn-close-requester');
+      const reqMethod = document.getElementById('req-method');
+      const reqUrl = document.getElementById('req-url');
+      const btnSendRequest = document.getElementById('btn-send-request');
+      const btnToggleAdvanced = document.getElementById('btn-toggle-req-advanced');
+      const advancedPanel = document.getElementById('requester-advanced-panel');
+      const reqParams = document.getElementById('req-params');
+      const reqBody = document.getElementById('req-body');
+      const reqBodyGroup = document.getElementById('req-body-group');
+      const reqHeaders = document.getElementById('req-headers');
+      const resBox = document.getElementById('requester-response-box');
+      const resBadge = document.getElementById('req-res-badge');
+      const resTime = document.getElementById('req-res-time');
+      const resSize = document.getElementById('req-res-size');
+      const resMode = document.getElementById('req-res-mode');
+      const resBody = document.getElementById('req-res-body');
+      const btnCopyRes = document.getElementById('btn-copy-response');
+
+      if (!requesterBox || !btnSendRequest) return;
+
+      // Przycisk otwierający konsolę z paska kontrolnego
+      if (btnOpenConsole) {
+        btnOpenConsole.addEventListener('click', () => {
+          const isHidden = requesterBox.style.display === 'none';
+          requesterBox.style.display = isHidden ? 'block' : 'none';
+          if (isHidden) {
+            if (!reqUrl.value && currentAuditData) {
+              reqUrl.value = currentAuditData.url;
+            }
+            requesterBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        });
+      }
+
+      // Przycisk zamykający
+      if (btnCloseRequester) {
+        btnCloseRequester.addEventListener('click', () => {
+          requesterBox.style.display = 'none';
+        });
+      }
+
+      // Zmiana metody HTTP -> przełączenie widoczności pola Body
+      if (reqMethod && reqBodyGroup) {
+        reqMethod.addEventListener('change', () => {
+          const m = reqMethod.value;
+          reqBodyGroup.style.display = (m === 'POST' || m === 'PUT' || m === 'PATCH') ? 'flex' : 'none';
+        });
+      }
+
+      // Przełącznik opcji zaawansowanych
+      if (btnToggleAdvanced && advancedPanel) {
+        btnToggleAdvanced.addEventListener('click', () => {
+          const isHidden = advancedPanel.style.display === 'none';
+          advancedPanel.style.display = isHidden ? 'flex' : 'none';
+        });
+      }
+
+      // Kopiowanie odpowiedzi do schowka
+      if (btnCopyRes && resBody) {
+        btnCopyRes.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(resBody.textContent);
+            const prevText = btnCopyRes.textContent;
+            btnCopyRes.textContent = 'Skopiowano!';
+            setTimeout(() => { btnCopyRes.textContent = prevText; }, 2000);
+          } catch (err) {
+            alert('Nie udało się skopiować zawartości do schowka.');
+          }
+        });
+      }
+
+      // Wysłanie zapytania przez naszą stronę
+      btnSendRequest.addEventListener('click', async () => {
+        const method = reqMethod.value || 'GET';
+        const rawUrl = reqUrl.value.trim();
+        if (!rawUrl) {
+          alert('Podaj adres URL lub wybierz endpoint do odpytania.');
+          return;
+        }
+
+        btnSendRequest.disabled = true;
+        btnSendRequest.innerHTML = `
+          <div class="endpoint-scan-spinner" style="width: 12px; height: 12px; border-width: 1.5px;"></div>
+          <span>Wysyłam...</span>
+        `;
+        resBox.style.display = 'none';
+
+        try {
+          const result = await sendRequestThroughPage(
+            method,
+            rawUrl,
+            reqParams.value.trim(),
+            reqHeaders.value.trim(),
+            reqBody.value.trim()
+          );
+
+          resBadge.className = `badge-http ${result.status >= 500 ? 'badge-http-500' : result.status >= 400 ? 'badge-http-400' : result.status >= 300 ? 'badge-http-300' : 'badge-http-200'}`;
+          resBadge.textContent = `${result.status} ${result.statusText}`;
+          resTime.textContent = `⚡ ${result.duration} ms`;
+          resSize.textContent = `📦 ${(result.size / 1024).toFixed(1)} KB`;
+          resMode.textContent = result.usedProxy ? 'CORS Gateway Proxy' : 'Bezpośrednio z przeglądarki';
+          resMode.style.color = result.usedProxy ? 'var(--amber-400)' : 'var(--emerald-400)';
+
+          resBody.textContent = result.body || '(Pusta odpowiedź serwera)';
+          resBox.style.display = 'block';
+        } catch (err) {
+          resBadge.className = 'badge-http badge-http-500';
+          resBadge.textContent = 'BŁĄD ZAPYTANIA';
+          resTime.textContent = '⚡ -- ms';
+          resSize.textContent = '📦 0 B';
+          resMode.textContent = 'Błąd sieci';
+          resBody.textContent = err.message || 'Wystąpił błąd podczas wysyłania zapytania do endpointu.';
+          resBox.style.display = 'block';
+        } finally {
+          btnSendRequest.disabled = false;
+          btnSendRequest.innerHTML = `
+            <span>Wyślij zapytanie</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          `;
+        }
+      });
+    }
+
+    function openRequesterForUrl(fullUrl, path, category) {
+      const requesterBox = document.getElementById('endpoint-requester-box');
+      const reqMethod = document.getElementById('req-method');
+      const reqUrl = document.getElementById('req-url');
+      const reqParams = document.getElementById('req-params');
+      const advancedPanel = document.getElementById('requester-advanced-panel');
+      const btnSendRequest = document.getElementById('btn-send-request');
+
+      if (!requesterBox || !reqUrl) return;
+
+      requesterBox.style.display = 'block';
+      reqUrl.value = fullUrl;
+
+      // Inteligentne podpowiedzi parametrów dla znanych endpointów
+      if (path === '/api/check') {
+        if (reqParams) reqParams.value = 'model=SM-S928B&region=EUX';
+        if (advancedPanel) advancedPanel.style.display = 'flex';
+      } else if (path === '/api/download') {
+        if (reqParams) reqParams.value = '';
+      }
+
+      if (category === 'API') {
+        if (reqMethod) reqMethod.value = 'GET';
+      }
+
+      requesterBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (btnSendRequest) {
+        btnSendRequest.focus();
+      }
     }
 
     function exportReport() {

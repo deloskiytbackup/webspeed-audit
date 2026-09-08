@@ -1,4 +1,4 @@
-import { runWebsiteAudit, normalizeUrl, probeCustomEndpoint, crawlAndProbeLiveEndpoints } from './api.js';
+import { runWebsiteAudit, normalizeUrl, probeCustomEndpoint, crawlAndProbeLiveEndpoints, sendRequestThroughPage } from './api.js';
 
 let currentAuditData = null;
 
@@ -62,6 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Obsługa testowania własnych endpointów
   setupEndpointProbe();
+
+  // Obsługa interaktywnej konsoli zapytań HTTP
+  setupEndpointRequester();
 
   // Inicjalizacja zwijania sekcji (Collapsible / Accordion)
   setupCollapsibleSections();
@@ -565,6 +568,7 @@ function createEndpointRow(ep) {
     <div class="endpoint-right">
       <span class="endpoint-latency" style="color: ${latencyColor};">⚡ ${ep.latency} ms</span>
       <span class="badge-http ${badgeClass}">${ep.status} ${ep.statusText}</span>
+      <button type="button" class="btn-query-row" title="Wyślij zapytanie do tego endpointu przez naszą stronę">⚡ Zapytaj</button>
       <a href="${ep.fullUrl}" target="_blank" rel="noopener noreferrer" class="endpoint-link" title="Otwórz URL w nowej karcie">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -574,7 +578,176 @@ function createEndpointRow(ep) {
       </a>
     </div>
   `;
+
+  const btnQuery = row.querySelector('.btn-query-row');
+  if (btnQuery) {
+    btnQuery.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openRequesterForUrl(ep.fullUrl, ep.path, ep.category);
+    });
+  }
+
   return row;
+}
+
+function setupEndpointRequester() {
+  const requesterBox = document.getElementById('endpoint-requester-box');
+  const btnOpenConsole = document.getElementById('btn-open-console');
+  const btnCloseRequester = document.getElementById('btn-close-requester');
+  const reqMethod = document.getElementById('req-method');
+  const reqUrl = document.getElementById('req-url');
+  const btnSendRequest = document.getElementById('btn-send-request');
+  const btnToggleAdvanced = document.getElementById('btn-toggle-req-advanced');
+  const advancedPanel = document.getElementById('requester-advanced-panel');
+  const reqParams = document.getElementById('req-params');
+  const reqBody = document.getElementById('req-body');
+  const reqBodyGroup = document.getElementById('req-body-group');
+  const reqHeaders = document.getElementById('req-headers');
+  const resBox = document.getElementById('requester-response-box');
+  const resBadge = document.getElementById('req-res-badge');
+  const resTime = document.getElementById('req-res-time');
+  const resSize = document.getElementById('req-res-size');
+  const resMode = document.getElementById('req-res-mode');
+  const resBody = document.getElementById('req-res-body');
+  const btnCopyRes = document.getElementById('btn-copy-response');
+
+  if (!requesterBox || !btnSendRequest) return;
+
+  // Przycisk otwierający konsolę z paska kontrolnego
+  if (btnOpenConsole) {
+    btnOpenConsole.addEventListener('click', () => {
+      const isHidden = requesterBox.style.display === 'none';
+      requesterBox.style.display = isHidden ? 'block' : 'none';
+      if (isHidden) {
+        if (!reqUrl.value && currentAuditData) {
+          reqUrl.value = currentAuditData.url;
+        }
+        requesterBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+  }
+
+  // Przycisk zamykający
+  if (btnCloseRequester) {
+    btnCloseRequester.addEventListener('click', () => {
+      requesterBox.style.display = 'none';
+    });
+  }
+
+  // Zmiana metody HTTP -> przełączenie widoczności pola Body
+  if (reqMethod && reqBodyGroup) {
+    reqMethod.addEventListener('change', () => {
+      const m = reqMethod.value;
+      reqBodyGroup.style.display = (m === 'POST' || m === 'PUT' || m === 'PATCH') ? 'flex' : 'none';
+    });
+  }
+
+  // Przełącznik opcji zaawansowanych
+  if (btnToggleAdvanced && advancedPanel) {
+    btnToggleAdvanced.addEventListener('click', () => {
+      const isHidden = advancedPanel.style.display === 'none';
+      advancedPanel.style.display = isHidden ? 'flex' : 'none';
+    });
+  }
+
+  // Kopiowanie odpowiedzi do schowka
+  if (btnCopyRes && resBody) {
+    btnCopyRes.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(resBody.textContent);
+        const prevText = btnCopyRes.textContent;
+        btnCopyRes.textContent = 'Skopiowano!';
+        setTimeout(() => { btnCopyRes.textContent = prevText; }, 2000);
+      } catch (err) {
+        alert('Nie udało się skopiować zawartości do schowka.');
+      }
+    });
+  }
+
+  // Wysłanie zapytania przez naszą stronę
+  btnSendRequest.addEventListener('click', async () => {
+    const method = reqMethod.value || 'GET';
+    const rawUrl = reqUrl.value.trim();
+    if (!rawUrl) {
+      alert('Podaj adres URL lub wybierz endpoint do odpytania.');
+      return;
+    }
+
+    btnSendRequest.disabled = true;
+    btnSendRequest.innerHTML = `
+      <div class="endpoint-scan-spinner" style="width: 12px; height: 12px; border-width: 1.5px;"></div>
+      <span>Wysyłam...</span>
+    `;
+    resBox.style.display = 'none';
+
+    try {
+      const result = await sendRequestThroughPage(
+        method,
+        rawUrl,
+        reqParams.value.trim(),
+        reqHeaders.value.trim(),
+        reqBody.value.trim()
+      );
+
+      resBadge.className = `badge-http ${result.status >= 500 ? 'badge-http-500' : result.status >= 400 ? 'badge-http-400' : result.status >= 300 ? 'badge-http-300' : 'badge-http-200'}`;
+      resBadge.textContent = `${result.status} ${result.statusText}`;
+      resTime.textContent = `⚡ ${result.duration} ms`;
+      resSize.textContent = `📦 ${(result.size / 1024).toFixed(1)} KB`;
+      resMode.textContent = result.usedProxy ? 'CORS Gateway Proxy' : 'Bezpośrednio z przeglądarki';
+      resMode.style.color = result.usedProxy ? 'var(--amber-400)' : 'var(--emerald-400)';
+
+      resBody.textContent = result.body || '(Pusta odpowiedź serwera)';
+      resBox.style.display = 'block';
+    } catch (err) {
+      resBadge.className = 'badge-http badge-http-500';
+      resBadge.textContent = 'BŁĄD ZAPYTANIA';
+      resTime.textContent = '⚡ -- ms';
+      resSize.textContent = '📦 0 B';
+      resMode.textContent = 'Błąd sieci';
+      resBody.textContent = err.message || 'Wystąpił błąd podczas wysyłania zapytania do endpointu.';
+      resBox.style.display = 'block';
+    } finally {
+      btnSendRequest.disabled = false;
+      btnSendRequest.innerHTML = `
+        <span>Wyślij zapytanie</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      `;
+    }
+  });
+}
+
+function openRequesterForUrl(fullUrl, path, category) {
+  const requesterBox = document.getElementById('endpoint-requester-box');
+  const reqMethod = document.getElementById('req-method');
+  const reqUrl = document.getElementById('req-url');
+  const reqParams = document.getElementById('req-params');
+  const advancedPanel = document.getElementById('requester-advanced-panel');
+  const btnSendRequest = document.getElementById('btn-send-request');
+
+  if (!requesterBox || !reqUrl) return;
+
+  requesterBox.style.display = 'block';
+  reqUrl.value = fullUrl;
+
+  // Inteligentne podpowiedzi parametrów dla znanych endpointów
+  if (path === '/api/check') {
+    if (reqParams) reqParams.value = 'model=SM-S928B&region=EUX';
+    if (advancedPanel) advancedPanel.style.display = 'flex';
+  } else if (path === '/api/download') {
+    if (reqParams) reqParams.value = '';
+  }
+
+  if (category === 'API') {
+    if (reqMethod) reqMethod.value = 'GET';
+  }
+
+  requesterBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (btnSendRequest) {
+    btnSendRequest.focus();
+  }
 }
 
 function exportReport() {
