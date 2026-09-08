@@ -156,11 +156,40 @@ function buildAuditPayload(url, perfScore, seoScore, secScore, uxScore, m, hash 
   };
 }
 
+export function isStaticAsset(path) {
+  const p = path.toLowerCase();
+  return (
+    p.startsWith('/_next') ||
+    p.endsWith('.js') ||
+    p.endsWith('.css') ||
+    p.endsWith('.ico') ||
+    p.endsWith('.png') ||
+    p.endsWith('.jpg') ||
+    p.endsWith('.jpeg') ||
+    p.endsWith('.webp') ||
+    p.endsWith('.svg') ||
+    p.endsWith('.woff') ||
+    p.endsWith('.woff2') ||
+    p.endsWith('.ttf') ||
+    p.endsWith('.map') ||
+    p.includes('/static/chunks/') ||
+    p.includes('/static/css/') ||
+    (p.includes('/assets/') && (p.endsWith('.js') || p.endsWith('.css')))
+  );
+}
+
+export function cleanRoutePath(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  let p = raw.split('?')[0].split('#')[0].trim();
+  if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
+  if (!p.startsWith('/')) return null;
+  if (p === '//' || p.startsWith('/_') || p.includes('//') || p.startsWith('/a/')) return null;
+  if (p.length < 2 || p.length > 80) return null;
+  return p;
+}
+
 export function getCategoryForPath(path) {
   const p = path.toLowerCase();
-  if (p.endsWith('.css') || p.includes('.css?')) return 'Stylesheet';
-  if (p.endsWith('.js') || p.includes('.js?')) return 'Script';
-  if (p.endsWith('.ico') || p.endsWith('.png') || p.endsWith('.jpg') || p.endsWith('.webp') || p.endsWith('.svg') || p.endsWith('.woff2')) return 'Asset';
   if (p.includes('/api/') || p.includes('/graphql') || p.includes('/wp-json/')) return 'API';
   if (p.includes('robots.txt') || p.includes('sitemap') || p.includes('feed') || p.endsWith('.xml')) return 'SEO';
   if (p.includes('.well-known') || p.includes('.env') || p.includes('.git')) return 'Security';
@@ -170,14 +199,17 @@ export function getCategoryForPath(path) {
 export function getDescForPath(path, status) {
   const p = path.toLowerCase();
   if (p === '/') return 'Strona główna serwisu';
-  if (p.endsWith('.css') || p.includes('.css?')) return 'Arkusz stylów CSS aplikacji';
-  if (p.endsWith('.js') || p.includes('.js?')) return 'Skrypt JavaScript / paczka frontendowa';
-  if (p.endsWith('.ico') || p.endsWith('.svg') || p.endsWith('.png') || p.endsWith('.webp')) return 'Plik graficzny / ikona aplikacji';
   if (p.includes('robots.txt')) return status === 200 ? 'Plik indeksacji wyszukiwarek robots.txt' : 'Brak pliku robots.txt na serwerze';
   if (p.includes('sitemap')) return status === 200 ? 'Mapa witryny sitemap.xml dla wyszukiwarki' : 'Brak mapy sitemap.xml na serwerze';
-  if (p.includes('/api/')) return status === 200 ? 'Aktywny endpoint REST API' : 'Endpoint REST API';
+  if (p.includes('/api/')) {
+    if (status >= 200 && status < 300) return 'Aktywny endpoint REST API';
+    if (status === 400) return 'Aktywny endpoint REST API (Oczekuje parametrów zapytania)';
+    if (status === 401 || status === 403) return 'Zabezpieczony endpoint API (Wymaga autoryzacji)';
+    if (status === 405) return 'Aktywny endpoint API (Oczekuje innej metody HTTP, np. POST)';
+    return 'Endpoint interfejsu REST API';
+  }
   if (p.includes('.well-known')) return 'Zasób standardu IETF RFC';
-  return status >= 200 && status < 300 ? 'Wykryta aktywna ścieżka aplikacji' : `Ścieżka aplikacji (status ${status})`;
+  return status >= 200 && status < 300 ? 'Aktywna podstrona / trasa aplikacji' : `Ścieżka serwisu (odpowiedź serwera: ${status})`;
 }
 
 export async function probeSingleEndpointLive(cleanBase, path) {
@@ -198,7 +230,7 @@ export async function probeSingleEndpointLive(cleanBase, path) {
     const duration = Math.max(12, Math.round(performance.now() - startTime));
 
     const status = res.status || 200;
-    const statusText = res.statusText || (status >= 400 ? 'NOT FOUND' : 'OK');
+    const statusText = res.statusText || (status >= 400 ? (status === 400 ? 'BAD REQUEST' : 'NOT FOUND') : 'OK');
 
     return {
       path,
@@ -269,44 +301,45 @@ export async function crawlAndProbeLiveEndpoints(baseUrl, onEndpointFound, onPro
     }
   }
 
-  // 2. Ekstrakcja linków, skryptów, styli i assetów z kodu HTML
-  const candidatePaths = new Set(['/']);
+  // 2. Ekstrakcja rzeczywistych tras z kodu HTML (wykluczając surowe paczki assetów i chunki)
+  const realEndpoints = new Set(['/']);
   const jsBundles = [];
 
   if (html) {
-    // href, src, action z HTML
-    for (const m of html.matchAll(/(?:href|src|action)=["']([^"'#\s>]+)["']/gi)) {
-      const val = m[1].trim();
+    // href="..." i action="..."
+    for (const m of html.matchAll(/(?:href|action)=["']([^"'#\s>]+)["']/gi)) {
+      let val = m[1].trim();
       if (val.startsWith('/') && !val.startsWith('//')) {
         const cleanPath = val.split('?')[0];
-        candidatePaths.add(cleanPath);
-        if (cleanPath.endsWith('.js') || cleanPath.includes('.js?')) {
-          jsBundles.push(cleanPath);
+        if (!isStaticAsset(cleanPath)) {
+          realEndpoints.add(cleanPath);
         }
       } else if (val.startsWith(cleanBase)) {
         const rel = val.replace(cleanBase, '').split('?')[0];
-        if (rel.startsWith('/')) {
-          candidatePaths.add(rel);
-          if (rel.endsWith('.js') || rel.includes('.js?')) jsBundles.push(rel);
+        if (rel.startsWith('/') && !isStaticAsset(rel)) {
+          realEndpoints.add(rel);
         }
       }
     }
 
-    // Next.js chunks, Webpack, Vite assets
-    for (const m of html.matchAll(/(?:\/_next\/static\/(?:chunks|css)\/|_next\/static\/|[a-zA-Z0-9_\-\.\/]+\.(?:js|css))[a-zA-Z0-9_\-\.\/]*/gi)) {
-      let p = m[0];
-      if (p.includes('.js') || p.includes('.css')) {
-        if (!p.startsWith('/')) p = '/' + p;
-        if (!p.includes('//') && p.length < 120) {
-          candidatePaths.add(p);
-          if (p.endsWith('.js')) jsBundles.push(p);
-        }
+    // Wykrywanie załadowanych paczek JS do zbadania ich kodu źródłowego
+    for (const m of html.matchAll(/src=["']([^"'#\s>]+\.js[^"'#\s>]*)["']/gi)) {
+      let src = m[1].trim();
+      if (src.startsWith('/') && !src.startsWith('//')) {
+        jsBundles.push(src);
+      } else if (src.startsWith(cleanBase)) {
+        jsBundles.push(src.replace(cleanBase, ''));
       }
+    }
+
+    // Dodatkowe chunki Next.js / Webpack w tagach script
+    for (const m of html.matchAll(/(?:\/_next\/static\/chunks\/[a-zA-Z0-9_\-\.]+\.js)/gi)) {
+      jsBundles.push(m[0]);
     }
   }
 
-  // 3. Skanowanie kodu paczek JavaScript aplikacji (SPA / Next.js / React / Vue) w poszukiwaniu API i tras
-  const uniqueJs = [...new Set(jsBundles)].slice(0, 8);
+  // 3. Głębokie skanowanie wnętrza plików JS aplikacji w celu wyciągnięcia endpointów API i routingu
+  const uniqueJs = [...new Set(jsBundles)].slice(0, 10);
   for (const jsPath of uniqueJs) {
     const fullJsUrl = cleanBase + (jsPath.startsWith('/') ? '' : '/') + jsPath;
     try {
@@ -320,41 +353,45 @@ export async function crawlAndProbeLiveEndpoints(baseUrl, onEndpointFound, onPro
       }
 
       if (code) {
-        // Wykrywanie endpointów API w kodzie aplikacji
-        const apiMatches = code.matchAll(/(?:["'`])(\/api\/[a-zA-Z0-9_\-\/\.]+)(?:["'`])/gi);
-        for (const am of apiMatches) {
-          const apiPath = am[1].split('?')[0];
-          if (apiPath.length < 80) candidatePaths.add(apiPath);
+        // (A) Wywołania fetch('/path'...) / axios.get('/path'...)
+        const fetchRegex = /(?:fetch|axios|ajax|get|post|put|delete|patch)\s*\(\s*[`"'](\/[^`"'\s\)]+)[`"']/gi;
+        for (const fm of code.matchAll(fetchRegex)) {
+          const clean = cleanRoutePath(fm[1]);
+          if (clean && !isStaticAsset(clean)) {
+            realEndpoints.add(clean);
+          }
         }
 
-        // Wykrywanie wywołań sieciowych fetch/axios/ajax w kodzie JS
-        const fetchMatches = code.matchAll(/(?:fetch|axios|get|post|put|delete|patch|ajax)\s*\(\s*["'](\/[a-zA-Z0-9_\-\/\.]+)["']/gi);
-        for (const fm of fetchMatches) {
-          const fPath = fm[1].split('?')[0];
-          if (fPath.length < 80) candidatePaths.add(fPath);
+        // (B) Wykrywanie stringów API: "/api/..."
+        const apiRegex = /[`"'](\/api\/[a-zA-Z0-9_\-\/]+)[`"'?]/gi;
+        for (const am of code.matchAll(apiRegex)) {
+          const clean = cleanRoutePath(am[1]);
+          if (clean && !isStaticAsset(clean)) {
+            realEndpoints.add(clean);
+          }
         }
 
-        // Wykrywanie tras routingu w kodzie aplikacji (React Router, Next Router, Vue Router)
-        const routeMatches = code.matchAll(/(?:push|replace|pathname|href|to|route|path)\s*[:=(]\s*["'](\/[a-zA-Z0-9_\-]+)["']/gi);
-        for (const rm of routeMatches) {
-          const route = rm[1];
-          if (route.length > 1 && !route.startsWith('/_') && route.length < 50) {
-            candidatePaths.add(route);
+        // (C) Deklaracje tras i routingu (push('/...'), href: '/...', path: '/...')
+        const routeRegex = /(?:push|replace|pathname|href|to|route)\s*[:=(]\s*[`"'](\/[a-zA-Z0-9_\-]+)[`"']/gi;
+        for (const rm of code.matchAll(routeRegex)) {
+          const clean = cleanRoutePath(rm[1]);
+          if (clean && !isStaticAsset(clean)) {
+            realEndpoints.add(clean);
           }
         }
       }
     } catch (e) {
-      // pomijamy błąd pobrania paczki JS
+      // pomijamy błąd pobrania pojedynczego chunka
     }
   }
 
   // 4. Podstawowe pliki standardu webowego
-  const standardProbes = ['/robots.txt', '/sitemap.xml', '/.well-known/security.txt'];
+  const standardProbes = ['/robots.txt', '/sitemap.xml'];
   for (const p of standardProbes) {
-    candidatePaths.add(p);
+    realEndpoints.add(p);
   }
 
-  const pathsArray = Array.from(candidatePaths);
+  const pathsArray = Array.from(realEndpoints);
   const total = pathsArray.length;
   let probedCount = 0;
 

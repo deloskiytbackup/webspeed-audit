@@ -497,10 +497,10 @@ function updateEndpointStats(endpoints) {
   if (!endpoints || !endpoints.length) return;
 
   const total = endpoints.length;
-  const active = endpoints.filter(e => e.status >= 200 && e.status < 300).length;
-  const issues = endpoints.filter(e => e.status >= 300).length;
+  const active = endpoints.filter(e => (e.status >= 200 && e.status < 300) || (e.category === 'API' && [400, 401, 403, 405].includes(e.status))).length;
+  const issues = total - active;
   const totalLatency = endpoints.reduce((sum, e) => sum + (parseInt(e.latency) || 0), 0);
-  const avgLatency = Math.round(totalLatency / total);
+  const avgLatency = total ? Math.round(totalLatency / total) : 0;
 
   if (epStatTotal) epStatTotal.textContent = total;
   if (epStatActive) epStatActive.textContent = active;
@@ -514,7 +514,7 @@ function updateEndpointsView() {
 
   const filtered = currentEndpoints.filter(ep => {
     // Filtr kategorii
-    if (activeEndpointCategory === '200' && (ep.status < 200 || ep.status >= 300)) return false;
+    if (activeEndpointCategory === '200' && !((ep.status >= 200 && ep.status < 300) || (ep.category === 'API' && [400, 401, 403, 405].includes(ep.status)))) return false;
     if (activeEndpointCategory === 'API' && ep.category !== 'API') return false;
     if (activeEndpointCategory === 'Routing' && ep.category !== 'Routing') return false;
     if (activeEndpointCategory === 'SEO' && ep.category !== 'SEO') return false;
