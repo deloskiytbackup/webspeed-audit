@@ -15,8 +15,9 @@ const metricsGrid = document.getElementById('metrics-grid');
 const checklistContainer = document.getElementById('checklist-container');
 const btnExport = document.getElementById('btn-export');
 const btnContact = document.getElementById('btn-contact');
+const btnToggleAll = document.getElementById('btn-toggle-all');
 
-// Nowe kontenery na bogate dane
+// Kontenery na bogate dane
 const pillarsContainer = document.getElementById('pillars-container');
 const resourcesContainer = document.getElementById('resources-container');
 const timelineContainer = document.getElementById('timeline-container');
@@ -42,7 +43,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Eksport raportu
   btnExport.addEventListener('click', exportReport);
+
+  // Inicjalizacja zwijania sekcji (Collapsible / Accordion)
+  setupCollapsibleSections();
 });
+
+function setupCollapsibleSections() {
+  document.querySelectorAll('.collapsible-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const targetId = header.getAttribute('data-target');
+      const body = document.getElementById(targetId);
+      if (!body) return;
+
+      const isClosed = header.classList.toggle('is-closed');
+      body.classList.toggle('is-hidden', isClosed);
+    });
+  });
+
+  if (btnToggleAll) {
+    let allCollapsed = false;
+    btnToggleAll.addEventListener('click', () => {
+      allCollapsed = !allCollapsed;
+      document.querySelectorAll('.collapsible-header').forEach(header => {
+        const targetId = header.getAttribute('data-target');
+        const body = document.getElementById(targetId);
+        if (body) {
+          header.classList.toggle('is-closed', allCollapsed);
+          body.classList.toggle('is-hidden', allCollapsed);
+        }
+      });
+      btnToggleAll.textContent = allCollapsed ? 'Rozwiń wszystkie sekcje ▾' : 'Zwiń wszystkie sekcje ▴';
+    });
+  }
+}
 
 async function triggerAudit(url) {
   loadingBox.style.display = 'block';
@@ -265,18 +298,51 @@ function renderChecklist(checklist) {
     const row = document.createElement('div');
     row.className = 'checklist-item';
 
+    const tip = getRemediationTip(item.title, item.status);
+
     row.innerHTML = `
       <div class="check-icon check-${item.status}">${icons[item.status]}</div>
       <div class="check-content">
         <div class="check-header">
           <h4>${item.title}</h4>
-          ${item.category ? `<span class="check-category">${item.category}</span>` : ''}
+          <div class="check-header-right">
+            ${item.category ? `<span class="check-category">${item.category}</span>` : ''}
+          </div>
         </div>
         <p>${item.desc}</p>
+        ${tip ? `<div class="check-remediation">${tip}</div>` : ''}
       </div>
     `;
+
     checklistContainer.appendChild(row);
   });
+}
+
+function getRemediationTip(title, status) {
+  if (status === 'pass') return null;
+
+  if (title.includes('obrazów')) {
+    return '<strong>💡 Rekomendacja developera:</strong> Skonwertuj pliki PNG/JPG do nowoczesnego formatu <code>.webp</code> lub <code>.avif</code>. Zastosuj tag <code>&lt;picture&gt;</code> i atrybut <code>loading="lazy"</code> dla grafik poniżej pierwszego ekranu.';
+  }
+  if (title.includes('renderowanie')) {
+    return '<strong>💡 Rekomendacja developera:</strong> Dodaj atrybuty <code>defer</code> lub <code>async</code> do zewnętrznych skryptów JavaScript. Wydziel krytyczny CSS (Critical CSS) i wstrzyknij go w <code>&lt;style&gt;</code> w nagłówku.';
+  }
+  if (title.includes('podręczna')) {
+    return '<strong>💡 Rekomendacja developera:</strong> Skonfiguruj nagłówek serwera <code>Cache-Control: public, max-age=31536000, immutable</code> dla plików statycznych w Nginx/Apache lub na CDN Cloudflare.';
+  }
+  if (title.includes('meta-tagów')) {
+    return '<strong>💡 Rekomendacja developera:</strong> Uzupełnij tag <code>&lt;meta name="description" content="..."&gt;</code> (optymalnie 140–160 znaków) oraz tagi <code>og:title</code> i <code>og:image</code> dla podglądu w mediach społecznościowych.';
+  }
+  if (title.includes('nagłówków')) {
+    return '<strong>💡 Rekomendacja developera:</strong> Upewnij się, że strona posiada dokładnie jeden główny nagłówek <code>&lt;h1&gt;</code> z główną frazą kluczową, a kolejne sekcje korzystają z hierarchii <code>&lt;h2&gt;</code> i <code>&lt;h3&gt;</code>.';
+  }
+  if (title.includes('dotykowych')) {
+    return '<strong>💡 Rekomendacja developera:</strong> Zwiększ odstępy (padding) dla przycisków i linków mobilnych do minimum 48x48px, aby ułatwić obsługę kciukiem.';
+  }
+  if (title.includes('SSL')) {
+    return '<strong>💡 Rekomendacja developera:</strong> Wygeneruj darmowy certyfikat SSL Let\'s Encrypt na hostingu i wymuś przekierowanie 301 z HTTP na HTTPS.';
+  }
+  return null;
 }
 
 function exportReport() {

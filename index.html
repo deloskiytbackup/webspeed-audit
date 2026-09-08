@@ -546,12 +546,61 @@ header.site-header {
 .score-amber { color: var(--amber-400); }
 .score-rose { color: var(--rose-400); }
 
-/* Section headings */
-.section-heading {
+/* Results Toolbar */
+.results-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 2rem 0 0.85rem;
+  margin: 1.75rem 0 1rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.toolbar-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--zinc-300);
+}
+
+.btn-toggle-all {
+  font-size: 11px;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  color: var(--zinc-300);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-toggle-all:hover {
+  background-color: #20222c;
+  border-color: var(--card-border-hover);
+  color: #ffffff;
+}
+
+/* Collapsible Section Headings */
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1.5rem 0 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+
+.collapsible-header:hover {
+  border-color: var(--card-border-hover);
+  background-color: #16181f;
 }
 
 .section-title {
@@ -564,10 +613,35 @@ header.site-header {
   gap: 0.5rem;
 }
 
+.collapsible-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 .section-badge {
   font-size: 11px;
   font-weight: 500;
-  color: var(--zinc-500);
+  color: var(--zinc-400);
+}
+
+.chevron-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--zinc-400);
+  transition: transform 0.25s ease;
+}
+
+.collapsible-header.is-closed .chevron-icon {
+  transform: rotate(-90deg);
+}
+
+.collapsible-body {
+  transition: all 0.25s ease;
+}
+
+.collapsible-body.is-hidden {
+  display: none;
 }
 
 /* Metrics Grid (Core Web Vitals - 6 cards) */
@@ -867,7 +941,7 @@ header.site-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.25rem;
 }
 
 .check-content h4 {
@@ -890,6 +964,27 @@ header.site-header {
 .check-content p {
   font-size: 12px;
   color: var(--zinc-400);
+  margin-bottom: 0.35rem;
+}
+
+.check-remediation {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #cbd5e1;
+  background-color: #121319;
+  border-left: 2px solid var(--primary);
+  border-radius: 0 4px 4px 0;
+  padding: 0.45rem 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.check-remediation code {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  background-color: #1f222d;
+  color: var(--primary);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-size: 10px;
 }
 
 /* Lead generation banner (Samfirm style) */
@@ -901,6 +996,7 @@ header.site-header {
   text-align: center;
   position: relative;
   overflow: hidden;
+  margin-top: 2rem;
 }
 
 .lead-card::before {
@@ -1095,7 +1191,7 @@ footer.site-footer {
       </div>
 
       <!-- 4 Główne Filary Audytu (Pillars Grid) -->
-      <div class="section-heading">
+      <div class="collapsible-header" data-target="pillars-container">
         <h2 class="section-title">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="7"></rect>
@@ -1105,12 +1201,23 @@ footer.site-footer {
           </svg>
           Główne obszary audytu technicznego
         </h2>
-        <span class="section-badge">Skala 0-100</span>
+        <div class="collapsible-right">
+          <span class="section-badge">Skala 0-100</span>
+          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
       </div>
-      <div id="pillars-container" class="pillars-grid"></div>
+      <div id="pillars-container" class="pillars-grid collapsible-body"></div>
+
+      <!-- Pasek narzędziowy zwijania / rozwijania -->
+      <div class="results-toolbar">
+        <span class="toolbar-title">Sekcje szczegółowej analizy (kliknij nagłówek, aby zwinąć)</span>
+        <button type="button" id="btn-toggle-all" class="btn-toggle-all">Zwiń wszystkie sekcje ▴</button>
+      </div>
 
       <!-- Kafelki metryk Core Web Vitals (6 metryk) -->
-      <div class="section-heading">
+      <div class="collapsible-header" data-target="metrics-grid">
         <h2 class="section-title">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -1119,24 +1226,34 @@ footer.site-footer {
           </svg>
           Kluczowe wskaźniki Core Web Vitals
         </h2>
-        <span class="section-badge">Standard Google UX</span>
+        <div class="collapsible-right">
+          <span class="section-badge">Standard Google UX</span>
+          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
       </div>
-      <div id="metrics-grid" class="metrics-grid"></div>
+      <div id="metrics-grid" class="metrics-grid collapsible-body"></div>
 
       <!-- Waga strony i podział zasobów -->
-      <div class="section-heading">
+      <div class="collapsible-header" data-target="resources-container">
         <h2 class="section-title">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
           </svg>
           Waga strony i transfer zasobów
         </h2>
-        <span class="section-badge">Struktura danych</span>
+        <div class="collapsible-right">
+          <span class="section-badge">Struktura danych</span>
+          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
       </div>
-      <div id="resources-container" class="resources-card"></div>
+      <div id="resources-container" class="resources-card collapsible-body"></div>
 
       <!-- Oś czasu ładowania (Waterfall) -->
-      <div class="section-heading">
+      <div class="collapsible-header" data-target="timeline-container">
         <h2 class="section-title">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
@@ -1144,12 +1261,17 @@ footer.site-footer {
           </svg>
           Oś czasu renderowania (Waterfall Timeline)
         </h2>
-        <span class="section-badge">Kolejność zdarzeń</span>
+        <div class="collapsible-right">
+          <span class="section-badge">Kolejność zdarzeń</span>
+          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
       </div>
-      <div id="timeline-container"></div>
+      <div id="timeline-container" class="collapsible-body"></div>
 
       <!-- Wpływ na biznes i konwersję (ROI Impact) -->
-      <div class="section-heading">
+      <div class="collapsible-header" data-target="business-container">
         <h2 class="section-title">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
@@ -1157,12 +1279,17 @@ footer.site-footer {
           </svg>
           Wpływ szybkości na konwersję i sprzedaż
         </h2>
-        <span class="section-badge">Biznes & ROI</span>
+        <div class="collapsible-right">
+          <span class="section-badge">Biznes & ROI</span>
+          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
       </div>
-      <div id="business-container"></div>
+      <div id="business-container" class="collapsible-body"></div>
 
       <!-- Diagnostyka techniczna i zalecenia -->
-      <div class="section-heading">
+      <div class="collapsible-header" data-target="checklist-container">
         <h2 class="section-title">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 11l3 3L22 4"></path>
@@ -1170,9 +1297,14 @@ footer.site-footer {
           </svg>
           Szczegółowa checklista techniczna & SEO
         </h2>
-        <span class="section-badge">10 testów diagnostycznych</span>
+        <div class="collapsible-right">
+          <span class="section-badge">10 testów diagnostycznych</span>
+          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
       </div>
-      <div id="checklist-container" class="checklist-card"></div>
+      <div id="checklist-container" class="checklist-card collapsible-body"></div>
 
       <!-- Lead Generation Pitch Box -->
       <div class="lead-card">
