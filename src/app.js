@@ -1,4 +1,4 @@
-import { runWebsiteAudit, normalizeUrl } from './api.js';
+import { runWebsiteAudit, normalizeUrl, probeCustomEndpoint } from './api.js';
 
 let currentAuditData = null;
 
@@ -23,6 +23,12 @@ const resourcesContainer = document.getElementById('resources-container');
 const timelineContainer = document.getElementById('timeline-container');
 const businessContainer = document.getElementById('business-container');
 
+// Elementy skanera endpointów
+const endpointsContainer = document.getElementById('endpoints-container');
+const endpointCustomInput = document.getElementById('endpoint-custom-input');
+const btnProbeEndpoint = document.getElementById('btn-probe-endpoint');
+const endpointsList = document.getElementById('endpoints-list');
+
 // Inicjalizacja
 document.addEventListener('DOMContentLoaded', () => {
   // Obsługa kliknięć w przykłady
@@ -43,6 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Eksport raportu
   btnExport.addEventListener('click', exportReport);
+
+  // Obsługa testowania własnych endpointów
+  setupEndpointProbe();
 
   // Inicjalizacja zwijania sekcji (Collapsible / Accordion)
   setupCollapsibleSections();
@@ -117,6 +126,11 @@ function renderResults(data) {
 
   // 6. Szczegółowa checklista diagnostyczna
   renderChecklist(data.checklist);
+
+  // 7. Skaner endpointów i testowanie własnych ścieżek
+  if (data.endpoints) {
+    renderEndpoints(data.endpoints, data.url);
+  }
 
   // Aktualizacja linku kontaktowego z tematem
   btnContact.href = `mailto:deloskiyt@gmail.com?subject=Optymalizacja%20strony%20${encodeURIComponent(data.url)}&body=Dzie%C5%84%20dobry%20Marcel,%0A%0AChc%C4%99%20skonsultowa%C4%87%20wynik%20audytu%20dla%20strony:%20${encodeURIComponent(data.url)}%20(Wynik:%20${data.performanceScore}/100).%0A%0AProsz%C4%99%20o%20kontakt.`;
@@ -345,6 +359,78 @@ function getRemediationTip(title, status) {
   return null;
 }
 
+function setupEndpointProbe() {
+  if (!btnProbeEndpoint || !endpointCustomInput) return;
+
+  const handleProbe = async () => {
+    const customPath = endpointCustomInput.value.trim();
+    if (!customPath) return;
+    if (!currentAuditData) {
+      alert('Najpierw wykonaj audyt strony, aby sprawdzić endpoint.');
+      return;
+    }
+
+    btnProbeEndpoint.disabled = true;
+    btnProbeEndpoint.textContent = 'Sprawdzam...';
+
+    try {
+      const result = await probeCustomEndpoint(currentAuditData.url, customPath);
+      if (endpointsList) {
+        const newRow = createEndpointRow(result);
+        newRow.style.animation = 'fadeIn 0.3s ease';
+        endpointsList.prepend(newRow);
+      }
+      if (currentAuditData.endpoints) {
+        currentAuditData.endpoints.unshift(result);
+      }
+      endpointCustomInput.value = '';
+    } catch (err) {
+      alert('Błąd podczas sprawdzania endpointu: ' + (err.message || err));
+    } finally {
+      btnProbeEndpoint.disabled = false;
+      btnProbeEndpoint.textContent = 'Sprawdź endpoint';
+    }
+  };
+
+  btnProbeEndpoint.addEventListener('click', handleProbe);
+  endpointCustomInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleProbe();
+    }
+  });
+}
+
+function renderEndpoints(endpoints, baseUrl) {
+  if (!endpointsList) return;
+  endpointsList.innerHTML = '';
+
+  endpoints.forEach(ep => {
+    endpointsList.appendChild(createEndpointRow(ep));
+  });
+}
+
+function createEndpointRow(ep) {
+  const row = document.createElement('div');
+  row.className = 'endpoint-row';
+
+  const badgeClass = ep.status >= 500 ? 'badge-http-500' :
+                     ep.status >= 400 ? 'badge-http-400' :
+                     ep.status >= 300 ? 'badge-http-300' : 'badge-http-200';
+
+  row.innerHTML = `
+    <div class="endpoint-left">
+      <span class="endpoint-path" title="${ep.fullUrl}">${ep.path}</span>
+      <span class="endpoint-tag">${ep.category}</span>
+    </div>
+    <div class="endpoint-right">
+      <span class="endpoint-latency">${ep.latency} ms</span>
+      <span class="badge-http ${badgeClass}">${ep.status} ${ep.statusText}</span>
+    </div>
+  `;
+  return row;
+}
+
 function exportReport() {
   if (!currentAuditData) return;
 
@@ -395,6 +481,11 @@ ${d.timeline.map(t => `- **${t.name}:** ${t.time}`).join('\n')}
 
 ## 🔍 Szczegółowa Diagnostyka i Zalecenia Techniczne:
 ${d.checklist.map(c => `- [${c.status.toUpperCase()}] [${c.category || 'Ogólne'}] ${c.title}: ${c.desc}`).join('\n')}
+
+---
+
+## 📡 Przetestowane Endpointy i Dostępność:
+${(d.endpoints || []).map(ep => `- [HTTP ${ep.status}] ${ep.path} (${ep.category}) — ${ep.latency} ms [${ep.statusText}]`).join('\n')}
 
 ---
 

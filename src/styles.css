@@ -632,7 +632,150 @@ header.site-header {
 }
 
 .collapsible-body.is-hidden {
-  display: none;
+  display: none !important;
+}
+
+/* Endpoint Scanner & Probe Styles */
+.endpoint-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.endpoint-search-box {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.endpoint-input {
+  flex: 1;
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  padding: 0.55rem 0.85rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.endpoint-input:focus {
+  border-color: var(--primary);
+}
+
+.endpoint-btn-probe {
+  background-color: var(--primary-btn);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.endpoint-btn-probe:hover {
+  background-color: var(--primary-btn-hover);
+}
+
+.endpoint-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.endpoint-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.75rem;
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.endpoint-row:hover {
+  border-color: var(--card-border-hover);
+  background-color: #181a24;
+}
+
+.endpoint-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.endpoint-path {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.endpoint-tag {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--zinc-400);
+  background-color: #1f222d;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+}
+
+.endpoint-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.endpoint-latency {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  color: var(--zinc-400);
+}
+
+.badge-http {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.badge-http-200 {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--emerald-400);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-http-300 {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.badge-http-400 {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--amber-400);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-http-500 {
+  background-color: rgba(244, 63, 94, 0.15);
+  color: var(--rose-400);
+  border: 1px solid rgba(244, 63, 94, 0.3);
 }
 
 /* Metrics Grid (Core Web Vitals - 6 cards) */
