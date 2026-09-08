@@ -160,16 +160,43 @@ function generateAutoEndpoints(url, hash = 12345) {
   const base = url.replace(/\/+$/, '');
 
   return [
-    { path: '/robots.txt', fullUrl: `${base}/robots.txt`, category: 'SEO', status: 200, statusText: 'OK', latency: 35 + (hash % 30), type: 'text/plain' },
-    { path: '/sitemap.xml', fullUrl: `${base}/sitemap.xml`, category: 'SEO', status: 200, statusText: 'OK', latency: 50 + (hash % 45), type: 'application/xml' },
-    { path: '/favicon.ico', fullUrl: `${base}/favicon.ico`, category: 'Asset', status: 200, statusText: 'OK', latency: 25 + (hash % 20), type: 'image/x-icon' },
-    { path: '/api/health', fullUrl: `${base}/api/health`, category: 'API', status: (hash % 3 === 0 ? 200 : 404), statusText: (hash % 3 === 0 ? 'OK' : 'NOT FOUND'), latency: 60 + (hash % 40), type: 'application/json' },
-    { path: '/api/v1', fullUrl: `${base}/api/v1`, category: 'API', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 75 + (hash % 50), type: 'application/json' },
-    { path: '/wp-json/', fullUrl: `${base}/wp-json/`, category: 'CMS / REST', status: (hash % 4 === 0 ? 200 : 404), statusText: (hash % 4 === 0 ? 'OK' : 'NOT FOUND'), latency: 90 + (hash % 60), type: 'application/json' },
-    { path: '/graphql', fullUrl: `${base}/graphql`, category: 'GraphQL', status: (hash % 5 === 0 ? 200 : 404), statusText: (hash % 5 === 0 ? 'OK' : 'NOT FOUND'), latency: 80 + (hash % 40), type: 'application/json' },
-    { path: '/feed', fullUrl: `${base}/feed`, category: 'RSS', status: 200, statusText: 'OK', latency: 45 + (hash % 35), type: 'application/rss+xml' },
-    { path: '/kontakt', fullUrl: `${base}/kontakt`, category: 'Podstrona', status: 200, statusText: 'OK', latency: 85 + (hash % 60), type: 'text/html' },
-    { path: '/.well-known/security.txt', fullUrl: `${base}/.well-known/security.txt`, category: 'Security', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 30 + (hash % 25), type: 'text/plain' }
+    // 1. Główne trasy i podstrony (Routing / Pages)
+    { path: '/', fullUrl: `${base}/`, category: 'Routing', status: 200, statusText: 'OK', latency: 25 + (hash % 20), type: 'text/html', desc: 'Strona główna serwisu' },
+    { path: '/download', fullUrl: `${base}/download`, category: 'Routing', status: (hash % 7 === 0 ? 404 : 200), statusText: (hash % 7 === 0 ? 'NOT FOUND' : 'OK'), latency: 35 + (hash % 30), type: 'text/html', desc: 'Sekcja pobierania plików i oprogramowania' },
+    { path: '/check', fullUrl: `${base}/check`, category: 'Routing', status: 200, statusText: 'OK', latency: 40 + (hash % 25), type: 'text/html', desc: 'Narzędzie sprawdzania wersji i statusu' },
+    { path: '/kontakt', fullUrl: `${base}/kontakt`, category: 'Routing', status: 200, statusText: 'OK', latency: 38 + (hash % 30), type: 'text/html', desc: 'Formularz kontaktowy i dane firmy' },
+    { path: '/about', fullUrl: `${base}/about`, category: 'Routing', status: (hash % 3 === 0 ? 200 : 301), statusText: (hash % 3 === 0 ? 'OK' : 'MOVED'), latency: 30 + (hash % 20), type: 'text/html', desc: 'Informacje o projekcie i autorach' },
+    { path: '/pricing', fullUrl: `${base}/pricing`, category: 'Routing', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 42 + (hash % 35), type: 'text/html', desc: 'Cennik usług i subskrypcje' },
+    { path: '/blog', fullUrl: `${base}/blog`, category: 'Routing', status: 200, statusText: 'OK', latency: 45 + (hash % 40), type: 'text/html', desc: 'Artykuły, poradniki i aktualności' },
+    { path: '/login', fullUrl: `${base}/login`, category: 'Routing', status: 200, statusText: 'OK', latency: 32 + (hash % 25), type: 'text/html', desc: 'Panel logowania użytkownika' },
+    { path: '/regulamin', fullUrl: `${base}/regulamin`, category: 'Routing', status: 200, statusText: 'OK', latency: 30 + (hash % 25), type: 'text/html', desc: 'Warunki korzystania z serwisu' },
+    { path: '/polityka-prywatnosci', fullUrl: `${base}/polityka-prywatnosci`, category: 'Routing', status: 200, statusText: 'OK', latency: 28 + (hash % 20), type: 'text/html', desc: 'Informacje o RODO i przetwarzaniu danych' },
+
+    // 2. REST API & GraphQL
+    { path: '/api/health', fullUrl: `${base}/api/health`, category: 'API', status: 200, statusText: 'OK', latency: 22 + (hash % 18), type: 'application/json', desc: 'Status zdrowia serwera i mikroserwisów' },
+    { path: '/api/v1', fullUrl: `${base}/api/v1`, category: 'API', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 55 + (hash % 45), type: 'application/json', desc: 'Główny punkt wejściowy API v1' },
+    { path: '/api/v2', fullUrl: `${base}/api/v2`, category: 'API', status: (hash % 4 === 0 ? 200 : 404), statusText: (hash % 4 === 0 ? 'OK' : 'NOT FOUND'), latency: 50 + (hash % 40), type: 'application/json', desc: 'Wersja v2 nowoczesnego REST API' },
+    { path: '/api/status', fullUrl: `${base}/api/status`, category: 'API', status: 200, statusText: 'OK', latency: 25 + (hash % 20), type: 'application/json', desc: 'Statystyki obciążenia serwera i bazy danych' },
+    { path: '/api/auth', fullUrl: `${base}/api/auth`, category: 'API', status: 200, statusText: 'OK', latency: 60 + (hash % 40), type: 'application/json', desc: 'Endpoint autoryzacji sesji i tokenów JWT' },
+    { path: '/api/config', fullUrl: `${base}/api/config`, category: 'API', status: 200, statusText: 'OK', latency: 35 + (hash % 25), type: 'application/json', desc: 'Konfiguracja publicznych parametrów aplikacji' },
+    { path: '/graphql', fullUrl: `${base}/graphql`, category: 'API', status: (hash % 5 === 0 ? 200 : 404), statusText: (hash % 5 === 0 ? 'OK' : 'NOT FOUND'), latency: 70 + (hash % 50), type: 'application/json', desc: 'Endpoint zapytań GraphQL' },
+    { path: '/wp-json/', fullUrl: `${base}/wp-json/`, category: 'API', status: (hash % 6 === 0 ? 200 : 404), statusText: (hash % 6 === 0 ? 'OK' : 'NOT FOUND'), latency: 85 + (hash % 60), type: 'application/json', desc: 'Interfejs WordPress REST API' },
+
+    // 3. SEO & Indeksacja wyszukiwarek
+    { path: '/robots.txt', fullUrl: `${base}/robots.txt`, category: 'SEO', status: 200, statusText: 'OK', latency: 20 + (hash % 15), type: 'text/plain', desc: 'Instrukcje indeksacji dla Googlebota' },
+    { path: '/sitemap.xml', fullUrl: `${base}/sitemap.xml`, category: 'SEO', status: 200, statusText: 'OK', latency: 45 + (hash % 35), type: 'application/xml', desc: 'Główna mapa linków XML serwisu' },
+    { path: '/sitemap_index.xml', fullUrl: `${base}/sitemap_index.xml`, category: 'SEO', status: (hash % 3 === 0 ? 200 : 404), statusText: (hash % 3 === 0 ? 'OK' : 'NOT FOUND'), latency: 50 + (hash % 40), type: 'application/xml', desc: 'Indeks wieloczęściowych map witryny' },
+    { path: '/feed', fullUrl: `${base}/feed`, category: 'SEO', status: 200, statusText: 'OK', latency: 40 + (hash % 30), type: 'application/rss+xml', desc: 'Kanał syndykacji treści RSS/Atom' },
+
+    // 4. Bezpieczeństwo & RFC Konfiguracja
+    { path: '/.well-known/security.txt', fullUrl: `${base}/.well-known/security.txt`, category: 'Security', status: 200, statusText: 'OK', latency: 28 + (hash % 20), type: 'text/plain', desc: 'Polityka raportowania podatności (RFC 9116)' },
+    { path: '/.well-known/assetlinks.json', fullUrl: `${base}/.well-known/assetlinks.json`, category: 'Security', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 32 + (hash % 22), type: 'application/json', desc: 'Weryfikacja powiązania z aplikacją Android' },
+    { path: '/.well-known/apple-app-site-association', fullUrl: `${base}/.well-known/apple-app-site-association`, category: 'Security', status: (hash % 3 === 0 ? 200 : 404), statusText: (hash % 3 === 0 ? 'OK' : 'NOT FOUND'), latency: 34 + (hash % 24), type: 'application/json', desc: 'Konfiguracja Universal Links dla urządzeń Apple iOS' },
+    { path: '/.env', fullUrl: `${base}/.env`, category: 'Security', status: 403, statusText: 'FORBIDDEN', latency: 18 + (hash % 12), type: 'text/plain', desc: 'Ochrona pliku konfiguracyjnego środowiska (Prawidłowo zablokowany)' },
+
+    // 5. Statyczne pliki i assety
+    { path: '/favicon.ico', fullUrl: `${base}/favicon.ico`, category: 'Asset', status: 200, statusText: 'OK', latency: 18 + (hash % 15), type: 'image/x-icon', desc: 'Główna ikona witryny w pasku przeglądarki' },
+    { path: '/manifest.json', fullUrl: `${base}/manifest.json`, category: 'Asset', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 26 + (hash % 18), type: 'application/json', desc: 'Manifest instalacyjny PWA (Progressive Web App)' }
   ];
 }
 

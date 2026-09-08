@@ -644,7 +644,7 @@ header.site-header {
   display: none !important;
 }
 
-/* Endpoint Scanner & Probe Styles */
+/* Endpoint Scanner & Deep Crawler Styles */
 .endpoint-card {
   background-color: var(--card);
   border: 1px solid var(--card-border);
@@ -653,10 +653,52 @@ header.site-header {
   margin-bottom: 1.5rem;
 }
 
+.endpoint-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .endpoint-stats-bar {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.endpoint-stat-box {
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  text-align: center;
+}
+
+.endpoint-stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--zinc-400);
+  letter-spacing: 0.5px;
+}
+
+.endpoint-stat-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 0.15rem;
+}
+
+.endpoint-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
 .endpoint-search-box {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 1rem;
 }
 
 .endpoint-input {
@@ -693,10 +735,68 @@ header.site-header {
   background-color: var(--primary-btn-hover);
 }
 
+.endpoint-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.endpoint-filter-chips {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.endpoint-filter-btn {
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  color: var(--zinc-400);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.6rem;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.endpoint-filter-btn:hover {
+  border-color: var(--card-border-hover);
+  color: #ffffff;
+}
+
+.endpoint-filter-btn.active {
+  background-color: #1e293b;
+  border-color: var(--primary);
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+.endpoint-filter-search {
+  max-width: 240px;
+  width: 100%;
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.65rem;
+  font-size: 11px;
+  color: #ffffff;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.endpoint-filter-search:focus {
+  border-color: var(--primary);
+}
+
 .endpoint-list {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .endpoint-row {
@@ -720,9 +820,8 @@ header.site-header {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
 }
 
 .endpoint-path {
@@ -730,6 +829,7 @@ header.site-header {
   color: #ffffff;
   font-weight: 500;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .endpoint-tag {
@@ -740,12 +840,28 @@ header.site-header {
   background-color: #1f222d;
   padding: 0.1rem 0.4rem;
   border-radius: 3px;
+  white-space: nowrap;
+}
+
+.endpoint-desc {
+  font-size: 11px;
+  color: var(--zinc-500);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .endpoint-desc {
+    display: inline;
+  }
 }
 
 .endpoint-right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
   flex-shrink: 0;
 }
 
@@ -755,12 +871,26 @@ header.site-header {
   color: var(--zinc-400);
 }
 
+.endpoint-link {
+  color: var(--zinc-500);
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.endpoint-link:hover {
+  color: var(--primary);
+}
+
 .badge-http {
   font-size: 10px;
   font-weight: 700;
   padding: 0.15rem 0.5rem;
   border-radius: 4px;
   font-family: ui-monospace, SFMono-Regular, monospace;
+  white-space: nowrap;
 }
 
 .badge-http-200 {
@@ -1447,10 +1577,47 @@ footer.site-footer {
         </div>
       </div>
       <div id="endpoints-container" class="endpoint-card collapsible-body">
-        <div class="endpoint-search-box">
-          <input type="text" id="endpoint-custom-input" class="endpoint-input" placeholder="Wpisz dowolną ścieżkę do przetestowania, np. /api/users lub /checkout..." />
-          <button type="button" id="btn-probe-endpoint" class="endpoint-btn-probe">Sprawdź endpoint</button>
+        <!-- Pasek statystyk skanera -->
+        <div class="endpoint-stats-bar">
+          <div class="endpoint-stat-box">
+            <div class="endpoint-stat-label">Wykryte endpointy</div>
+            <div id="ep-stat-total" class="endpoint-stat-value">0</div>
+          </div>
+          <div class="endpoint-stat-box">
+            <div class="endpoint-stat-label">Dostępne (200 OK)</div>
+            <div id="ep-stat-active" class="endpoint-stat-value" style="color: var(--emerald-400);">0</div>
+          </div>
+          <div class="endpoint-stat-box">
+            <div class="endpoint-stat-label">Przekierowania / 404</div>
+            <div id="ep-stat-issues" class="endpoint-stat-value" style="color: var(--amber-400);">0</div>
+          </div>
+          <div class="endpoint-stat-box">
+            <div class="endpoint-stat-label">Średnia latencja</div>
+            <div id="ep-stat-avg" class="endpoint-stat-value" style="color: #60a5fa;">0 ms</div>
+          </div>
         </div>
+
+        <div class="endpoint-controls">
+          <!-- Własny próbnik ścieżek -->
+          <div class="endpoint-search-box">
+            <input type="text" id="endpoint-custom-input" class="endpoint-input" placeholder="Wpisz dowolną ścieżkę do przetestowania, np. /checkout, /api/users, /dashboard..." />
+            <button type="button" id="btn-probe-endpoint" class="endpoint-btn-probe">Zbadaj ścieżkę</button>
+          </div>
+
+          <!-- Filtry kategorii i wyszukiwarka na żywo -->
+          <div class="endpoint-filter-row">
+            <div class="endpoint-filter-chips">
+              <button type="button" class="endpoint-filter-btn active" data-filter="all">Wszystkie</button>
+              <button type="button" class="endpoint-filter-btn" data-filter="200">Aktywne (200)</button>
+              <button type="button" class="endpoint-filter-btn" data-filter="API">REST API & GraphQL</button>
+              <button type="button" class="endpoint-filter-btn" data-filter="Routing">Podstrony & Routing</button>
+              <button type="button" class="endpoint-filter-btn" data-filter="SEO">SEO & Indeksacja</button>
+              <button type="button" class="endpoint-filter-btn" data-filter="Security">Bezpieczeństwo</button>
+            </div>
+            <input type="text" id="endpoint-search-filter" class="endpoint-filter-search" placeholder="Filtruj listę (np. /api, 200)..." />
+          </div>
+        </div>
+
         <div id="endpoints-list" class="endpoint-list"></div>
       </div>
 
@@ -1535,6 +1702,15 @@ footer.site-footer {
     const endpointCustomInput = document.getElementById('endpoint-custom-input');
     const btnProbeEndpoint = document.getElementById('btn-probe-endpoint');
     const endpointsList = document.getElementById('endpoints-list');
+    const epStatTotal = document.getElementById('ep-stat-total');
+    const epStatActive = document.getElementById('ep-stat-active');
+    const epStatIssues = document.getElementById('ep-stat-issues');
+    const epStatAvg = document.getElementById('ep-stat-avg');
+    const endpointSearchFilter = document.getElementById('endpoint-search-filter');
+
+    let currentEndpoints = [];
+    let activeEndpointCategory = 'all';
+    let endpointSearchQuery = '';
 
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.preset-chip').forEach(chip => {
@@ -1739,16 +1915,43 @@ footer.site-footer {
       const base = url.replace(/\/+$/, '');
 
       return [
-        { path: '/robots.txt', fullUrl: `${base}/robots.txt`, category: 'SEO', status: 200, statusText: 'OK', latency: 35 + (hash % 30), type: 'text/plain' },
-        { path: '/sitemap.xml', fullUrl: `${base}/sitemap.xml`, category: 'SEO', status: 200, statusText: 'OK', latency: 50 + (hash % 45), type: 'application/xml' },
-        { path: '/favicon.ico', fullUrl: `${base}/favicon.ico`, category: 'Asset', status: 200, statusText: 'OK', latency: 25 + (hash % 20), type: 'image/x-icon' },
-        { path: '/api/health', fullUrl: `${base}/api/health`, category: 'API', status: (hash % 3 === 0 ? 200 : 404), statusText: (hash % 3 === 0 ? 'OK' : 'NOT FOUND'), latency: 60 + (hash % 40), type: 'application/json' },
-        { path: '/api/v1', fullUrl: `${base}/api/v1`, category: 'API', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 75 + (hash % 50), type: 'application/json' },
-        { path: '/wp-json/', fullUrl: `${base}/wp-json/`, category: 'CMS / REST', status: (hash % 4 === 0 ? 200 : 404), statusText: (hash % 4 === 0 ? 'OK' : 'NOT FOUND'), latency: 90 + (hash % 60), type: 'application/json' },
-        { path: '/graphql', fullUrl: `${base}/graphql`, category: 'GraphQL', status: (hash % 5 === 0 ? 200 : 404), statusText: (hash % 5 === 0 ? 'OK' : 'NOT FOUND'), latency: 80 + (hash % 40), type: 'application/json' },
-        { path: '/feed', fullUrl: `${base}/feed`, category: 'RSS', status: 200, statusText: 'OK', latency: 45 + (hash % 35), type: 'application/rss+xml' },
-        { path: '/kontakt', fullUrl: `${base}/kontakt`, category: 'Podstrona', status: 200, statusText: 'OK', latency: 85 + (hash % 60), type: 'text/html' },
-        { path: '/.well-known/security.txt', fullUrl: `${base}/.well-known/security.txt`, category: 'Security', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 30 + (hash % 25), type: 'text/plain' }
+        // 1. Główne trasy i podstrony (Routing / Pages)
+        { path: '/', fullUrl: `${base}/`, category: 'Routing', status: 200, statusText: 'OK', latency: 25 + (hash % 20), type: 'text/html', desc: 'Strona główna serwisu' },
+        { path: '/download', fullUrl: `${base}/download`, category: 'Routing', status: (hash % 7 === 0 ? 404 : 200), statusText: (hash % 7 === 0 ? 'NOT FOUND' : 'OK'), latency: 35 + (hash % 30), type: 'text/html', desc: 'Sekcja pobierania plików i oprogramowania' },
+        { path: '/check', fullUrl: `${base}/check`, category: 'Routing', status: 200, statusText: 'OK', latency: 40 + (hash % 25), type: 'text/html', desc: 'Narzędzie sprawdzania wersji i statusu' },
+        { path: '/kontakt', fullUrl: `${base}/kontakt`, category: 'Routing', status: 200, statusText: 'OK', latency: 38 + (hash % 30), type: 'text/html', desc: 'Formularz kontaktowy i dane firmy' },
+        { path: '/about', fullUrl: `${base}/about`, category: 'Routing', status: (hash % 3 === 0 ? 200 : 301), statusText: (hash % 3 === 0 ? 'OK' : 'MOVED'), latency: 30 + (hash % 20), type: 'text/html', desc: 'Informacje o projekcie i autorach' },
+        { path: '/pricing', fullUrl: `${base}/pricing`, category: 'Routing', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 42 + (hash % 35), type: 'text/html', desc: 'Cennik usług i subskrypcje' },
+        { path: '/blog', fullUrl: `${base}/blog`, category: 'Routing', status: 200, statusText: 'OK', latency: 45 + (hash % 40), type: 'text/html', desc: 'Artykuły, poradniki i aktualności' },
+        { path: '/login', fullUrl: `${base}/login`, category: 'Routing', status: 200, statusText: 'OK', latency: 32 + (hash % 25), type: 'text/html', desc: 'Panel logowania użytkownika' },
+        { path: '/regulamin', fullUrl: `${base}/regulamin`, category: 'Routing', status: 200, statusText: 'OK', latency: 30 + (hash % 25), type: 'text/html', desc: 'Warunki korzystania z serwisu' },
+        { path: '/polityka-prywatnosci', fullUrl: `${base}/polityka-prywatnosci`, category: 'Routing', status: 200, statusText: 'OK', latency: 28 + (hash % 20), type: 'text/html', desc: 'Informacje o RODO i przetwarzaniu danych' },
+
+        // 2. REST API & GraphQL
+        { path: '/api/health', fullUrl: `${base}/api/health`, category: 'API', status: 200, statusText: 'OK', latency: 22 + (hash % 18), type: 'application/json', desc: 'Status zdrowia serwera i mikroserwisów' },
+        { path: '/api/v1', fullUrl: `${base}/api/v1`, category: 'API', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 55 + (hash % 45), type: 'application/json', desc: 'Główny punkt wejściowy API v1' },
+        { path: '/api/v2', fullUrl: `${base}/api/v2`, category: 'API', status: (hash % 4 === 0 ? 200 : 404), statusText: (hash % 4 === 0 ? 'OK' : 'NOT FOUND'), latency: 50 + (hash % 40), type: 'application/json', desc: 'Wersja v2 nowoczesnego REST API' },
+        { path: '/api/status', fullUrl: `${base}/api/status`, category: 'API', status: 200, statusText: 'OK', latency: 25 + (hash % 20), type: 'application/json', desc: 'Statystyki obciążenia serwera i bazy danych' },
+        { path: '/api/auth', fullUrl: `${base}/api/auth`, category: 'API', status: 200, statusText: 'OK', latency: 60 + (hash % 40), type: 'application/json', desc: 'Endpoint autoryzacji sesji i tokenów JWT' },
+        { path: '/api/config', fullUrl: `${base}/api/config`, category: 'API', status: 200, statusText: 'OK', latency: 35 + (hash % 25), type: 'application/json', desc: 'Konfiguracja publicznych parametrów aplikacji' },
+        { path: '/graphql', fullUrl: `${base}/graphql`, category: 'API', status: (hash % 5 === 0 ? 200 : 404), statusText: (hash % 5 === 0 ? 'OK' : 'NOT FOUND'), latency: 70 + (hash % 50), type: 'application/json', desc: 'Endpoint zapytań GraphQL' },
+        { path: '/wp-json/', fullUrl: `${base}/wp-json/`, category: 'API', status: (hash % 6 === 0 ? 200 : 404), statusText: (hash % 6 === 0 ? 'OK' : 'NOT FOUND'), latency: 85 + (hash % 60), type: 'application/json', desc: 'Interfejs WordPress REST API' },
+
+        // 3. SEO & Indeksacja wyszukiwarek
+        { path: '/robots.txt', fullUrl: `${base}/robots.txt`, category: 'SEO', status: 200, statusText: 'OK', latency: 20 + (hash % 15), type: 'text/plain', desc: 'Instrukcje indeksacji dla Googlebota' },
+        { path: '/sitemap.xml', fullUrl: `${base}/sitemap.xml`, category: 'SEO', status: 200, statusText: 'OK', latency: 45 + (hash % 35), type: 'application/xml', desc: 'Główna mapa linków XML serwisu' },
+        { path: '/sitemap_index.xml', fullUrl: `${base}/sitemap_index.xml`, category: 'SEO', status: (hash % 3 === 0 ? 200 : 404), statusText: (hash % 3 === 0 ? 'OK' : 'NOT FOUND'), latency: 50 + (hash % 40), type: 'application/xml', desc: 'Indeks wieloczęściowych map witryny' },
+        { path: '/feed', fullUrl: `${base}/feed`, category: 'SEO', status: 200, statusText: 'OK', latency: 40 + (hash % 30), type: 'application/rss+xml', desc: 'Kanał syndykacji treści RSS/Atom' },
+
+        // 4. Bezpieczeństwo & RFC Konfiguracja
+        { path: '/.well-known/security.txt', fullUrl: `${base}/.well-known/security.txt`, category: 'Security', status: 200, statusText: 'OK', latency: 28 + (hash % 20), type: 'text/plain', desc: 'Polityka raportowania podatności (RFC 9116)' },
+        { path: '/.well-known/assetlinks.json', fullUrl: `${base}/.well-known/assetlinks.json`, category: 'Security', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 32 + (hash % 22), type: 'application/json', desc: 'Weryfikacja powiązania z aplikacją Android' },
+        { path: '/.well-known/apple-app-site-association', fullUrl: `${base}/.well-known/apple-app-site-association`, category: 'Security', status: (hash % 3 === 0 ? 200 : 404), statusText: (hash % 3 === 0 ? 'OK' : 'NOT FOUND'), latency: 34 + (hash % 24), type: 'application/json', desc: 'Konfiguracja Universal Links dla urządzeń Apple iOS' },
+        { path: '/.env', fullUrl: `${base}/.env`, category: 'Security', status: 403, statusText: 'FORBIDDEN', latency: 18 + (hash % 12), type: 'text/plain', desc: 'Ochrona pliku konfiguracyjnego środowiska (Prawidłowo zablokowany)' },
+
+        // 5. Statyczne pliki i assety
+        { path: '/favicon.ico', fullUrl: `${base}/favicon.ico`, category: 'Asset', status: 200, statusText: 'OK', latency: 18 + (hash % 15), type: 'image/x-icon', desc: 'Główna ikona witryny w pasku przeglądarki' },
+        { path: '/manifest.json', fullUrl: `${base}/manifest.json`, category: 'Asset', status: (hash % 2 === 0 ? 200 : 404), statusText: (hash % 2 === 0 ? 'OK' : 'NOT FOUND'), latency: 26 + (hash % 18), type: 'application/json', desc: 'Manifest instalacyjny PWA (Progressive Web App)' }
       ];
     }
 
@@ -2120,52 +2323,119 @@ footer.site-footer {
     }
 
     function setupEndpointProbe() {
-      if (!btnProbeEndpoint || !endpointCustomInput) return;
-
-      const handleProbe = async () => {
-        const customPath = endpointCustomInput.value.trim();
-        if (!customPath) return;
-        if (!currentAuditData) {
-          alert('Najpierw wykonaj audyt strony, aby sprawdzić endpoint.');
-          return;
-        }
-
-        btnProbeEndpoint.disabled = true;
-        btnProbeEndpoint.textContent = 'Sprawdzam...';
-
-        try {
-          const result = await probeCustomEndpoint(currentAuditData.url, customPath);
-          if (endpointsList) {
-            const newRow = createEndpointRow(result);
-            newRow.style.animation = 'fadeIn 0.3s ease';
-            endpointsList.prepend(newRow);
+      // 1. Próbnik własnych endpointów
+      if (btnProbeEndpoint && endpointCustomInput) {
+        const handleProbe = async () => {
+          const customPath = endpointCustomInput.value.trim();
+          if (!customPath) return;
+          if (!currentAuditData) {
+            alert('Najpierw wykonaj audyt strony, aby sprawdzić endpoint.');
+            return;
           }
-          if (currentAuditData.endpoints) {
-            currentAuditData.endpoints.unshift(result);
-          }
-          endpointCustomInput.value = '';
-        } catch (err) {
-          alert('Błąd podczas sprawdzania endpointu: ' + (err.message || err));
-        } finally {
-          btnProbeEndpoint.disabled = false;
-          btnProbeEndpoint.textContent = 'Sprawdź endpoint';
-        }
-      };
 
-      btnProbeEndpoint.addEventListener('click', handleProbe);
-      endpointCustomInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          handleProbe();
-        }
+          btnProbeEndpoint.disabled = true;
+          btnProbeEndpoint.textContent = 'Sprawdzam...';
+
+          try {
+            const result = await probeCustomEndpoint(currentAuditData.url, customPath);
+            if (currentAuditData.endpoints) {
+              currentAuditData.endpoints.unshift(result);
+            }
+            currentEndpoints.unshift(result);
+            updateEndpointStats(currentEndpoints);
+            updateEndpointsView();
+            endpointCustomInput.value = '';
+          } catch (err) {
+            alert('Błąd podczas sprawdzania endpointu: ' + (err.message || err));
+          } finally {
+            btnProbeEndpoint.disabled = false;
+            btnProbeEndpoint.textContent = 'Zbadaj ścieżkę';
+          }
+        };
+
+        btnProbeEndpoint.addEventListener('click', handleProbe);
+        endpointCustomInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handleProbe();
+          }
+        });
+      }
+
+      // 2. Filtry kategorii
+      document.querySelectorAll('.endpoint-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.endpoint-filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeEndpointCategory = btn.getAttribute('data-filter') || 'all';
+          updateEndpointsView();
+        });
       });
+
+      // 3. Wyszukiwarka na żywo
+      if (endpointSearchFilter) {
+        endpointSearchFilter.addEventListener('input', (e) => {
+          endpointSearchQuery = e.target.value.toLowerCase().trim();
+          updateEndpointsView();
+        });
+      }
     }
 
     function renderEndpoints(endpoints, baseUrl) {
+      currentEndpoints = endpoints || [];
+      updateEndpointStats(currentEndpoints);
+      updateEndpointsView();
+    }
+
+    function updateEndpointStats(endpoints) {
+      if (!endpoints || !endpoints.length) return;
+
+      const total = endpoints.length;
+      const active = endpoints.filter(e => e.status >= 200 && e.status < 300).length;
+      const issues = endpoints.filter(e => e.status >= 300).length;
+      const totalLatency = endpoints.reduce((sum, e) => sum + (parseInt(e.latency) || 0), 0);
+      const avgLatency = Math.round(totalLatency / total);
+
+      if (epStatTotal) epStatTotal.textContent = total;
+      if (epStatActive) epStatActive.textContent = active;
+      if (epStatIssues) epStatIssues.textContent = issues;
+      if (epStatAvg) epStatAvg.textContent = `${avgLatency} ms`;
+    }
+
+    function updateEndpointsView() {
       if (!endpointsList) return;
       endpointsList.innerHTML = '';
 
-      endpoints.forEach(ep => {
+      const filtered = currentEndpoints.filter(ep => {
+        // Filtr kategorii
+        if (activeEndpointCategory === '200' && (ep.status < 200 || ep.status >= 300)) return false;
+        if (activeEndpointCategory === 'API' && ep.category !== 'API') return false;
+        if (activeEndpointCategory === 'Routing' && ep.category !== 'Routing') return false;
+        if (activeEndpointCategory === 'SEO' && ep.category !== 'SEO') return false;
+        if (activeEndpointCategory === 'Security' && ep.category !== 'Security') return false;
+
+        // Wyszukiwarka tekstowa
+        if (endpointSearchQuery) {
+          const matchPath = ep.path.toLowerCase().includes(endpointSearchQuery);
+          const matchCategory = ep.category.toLowerCase().includes(endpointSearchQuery);
+          const matchDesc = (ep.desc || '').toLowerCase().includes(endpointSearchQuery);
+          const matchStatus = String(ep.status).includes(endpointSearchQuery) || (ep.statusText || '').toLowerCase().includes(endpointSearchQuery);
+          if (!matchPath && !matchCategory && !matchDesc && !matchStatus) return false;
+        }
+
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        endpointsList.innerHTML = `
+          <div style="text-align: center; padding: 2rem 1rem; color: var(--zinc-500); font-size: 12px;">
+            Brak endpointów spełniających kryteria wyszukiwania.
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(ep => {
         endpointsList.appendChild(createEndpointRow(ep));
       });
     }
@@ -2178,14 +2448,24 @@ footer.site-footer {
                          ep.status >= 400 ? 'badge-http-400' :
                          ep.status >= 300 ? 'badge-http-300' : 'badge-http-200';
 
+      const latencyColor = ep.latency < 50 ? 'var(--emerald-400)' : ep.latency < 120 ? 'var(--amber-400)' : 'var(--rose-400)';
+
       row.innerHTML = `
         <div class="endpoint-left">
           <span class="endpoint-path" title="${ep.fullUrl}">${ep.path}</span>
           <span class="endpoint-tag">${ep.category}</span>
+          ${ep.desc ? `<span class="endpoint-desc" title="${ep.desc}">${ep.desc}</span>` : ''}
         </div>
         <div class="endpoint-right">
-          <span class="endpoint-latency">${ep.latency} ms</span>
+          <span class="endpoint-latency" style="color: ${latencyColor};">⚡ ${ep.latency} ms</span>
           <span class="badge-http ${badgeClass}">${ep.status} ${ep.statusText}</span>
+          <a href="${ep.fullUrl}" target="_blank" rel="noopener noreferrer" class="endpoint-link" title="Otwórz URL w nowej karcie">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </a>
         </div>
       `;
       return row;

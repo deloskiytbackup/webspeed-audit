@@ -28,6 +28,15 @@ const endpointsContainer = document.getElementById('endpoints-container');
 const endpointCustomInput = document.getElementById('endpoint-custom-input');
 const btnProbeEndpoint = document.getElementById('btn-probe-endpoint');
 const endpointsList = document.getElementById('endpoints-list');
+const epStatTotal = document.getElementById('ep-stat-total');
+const epStatActive = document.getElementById('ep-stat-active');
+const epStatIssues = document.getElementById('ep-stat-issues');
+const epStatAvg = document.getElementById('ep-stat-avg');
+const endpointSearchFilter = document.getElementById('endpoint-search-filter');
+
+let currentEndpoints = [];
+let activeEndpointCategory = 'all';
+let endpointSearchQuery = '';
 
 // Inicjalizacja
 document.addEventListener('DOMContentLoaded', () => {
@@ -360,52 +369,119 @@ function getRemediationTip(title, status) {
 }
 
 function setupEndpointProbe() {
-  if (!btnProbeEndpoint || !endpointCustomInput) return;
-
-  const handleProbe = async () => {
-    const customPath = endpointCustomInput.value.trim();
-    if (!customPath) return;
-    if (!currentAuditData) {
-      alert('Najpierw wykonaj audyt strony, aby sprawdzić endpoint.');
-      return;
-    }
-
-    btnProbeEndpoint.disabled = true;
-    btnProbeEndpoint.textContent = 'Sprawdzam...';
-
-    try {
-      const result = await probeCustomEndpoint(currentAuditData.url, customPath);
-      if (endpointsList) {
-        const newRow = createEndpointRow(result);
-        newRow.style.animation = 'fadeIn 0.3s ease';
-        endpointsList.prepend(newRow);
+  // 1. Próbnik własnych endpointów
+  if (btnProbeEndpoint && endpointCustomInput) {
+    const handleProbe = async () => {
+      const customPath = endpointCustomInput.value.trim();
+      if (!customPath) return;
+      if (!currentAuditData) {
+        alert('Najpierw wykonaj audyt strony, aby sprawdzić endpoint.');
+        return;
       }
-      if (currentAuditData.endpoints) {
-        currentAuditData.endpoints.unshift(result);
-      }
-      endpointCustomInput.value = '';
-    } catch (err) {
-      alert('Błąd podczas sprawdzania endpointu: ' + (err.message || err));
-    } finally {
-      btnProbeEndpoint.disabled = false;
-      btnProbeEndpoint.textContent = 'Sprawdź endpoint';
-    }
-  };
 
-  btnProbeEndpoint.addEventListener('click', handleProbe);
-  endpointCustomInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleProbe();
-    }
+      btnProbeEndpoint.disabled = true;
+      btnProbeEndpoint.textContent = 'Sprawdzam...';
+
+      try {
+        const result = await probeCustomEndpoint(currentAuditData.url, customPath);
+        if (currentAuditData.endpoints) {
+          currentAuditData.endpoints.unshift(result);
+        }
+        currentEndpoints.unshift(result);
+        updateEndpointStats(currentEndpoints);
+        updateEndpointsView();
+        endpointCustomInput.value = '';
+      } catch (err) {
+        alert('Błąd podczas sprawdzania endpointu: ' + (err.message || err));
+      } finally {
+        btnProbeEndpoint.disabled = false;
+        btnProbeEndpoint.textContent = 'Zbadaj ścieżkę';
+      }
+    };
+
+    btnProbeEndpoint.addEventListener('click', handleProbe);
+    endpointCustomInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleProbe();
+      }
+    });
+  }
+
+  // 2. Filtry kategorii
+  document.querySelectorAll('.endpoint-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.endpoint-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeEndpointCategory = btn.getAttribute('data-filter') || 'all';
+      updateEndpointsView();
+    });
   });
+
+  // 3. Wyszukiwarka na żywo
+  if (endpointSearchFilter) {
+    endpointSearchFilter.addEventListener('input', (e) => {
+      endpointSearchQuery = e.target.value.toLowerCase().trim();
+      updateEndpointsView();
+    });
+  }
 }
 
 function renderEndpoints(endpoints, baseUrl) {
+  currentEndpoints = endpoints || [];
+  updateEndpointStats(currentEndpoints);
+  updateEndpointsView();
+}
+
+function updateEndpointStats(endpoints) {
+  if (!endpoints || !endpoints.length) return;
+
+  const total = endpoints.length;
+  const active = endpoints.filter(e => e.status >= 200 && e.status < 300).length;
+  const issues = endpoints.filter(e => e.status >= 300).length;
+  const totalLatency = endpoints.reduce((sum, e) => sum + (parseInt(e.latency) || 0), 0);
+  const avgLatency = Math.round(totalLatency / total);
+
+  if (epStatTotal) epStatTotal.textContent = total;
+  if (epStatActive) epStatActive.textContent = active;
+  if (epStatIssues) epStatIssues.textContent = issues;
+  if (epStatAvg) epStatAvg.textContent = `${avgLatency} ms`;
+}
+
+function updateEndpointsView() {
   if (!endpointsList) return;
   endpointsList.innerHTML = '';
 
-  endpoints.forEach(ep => {
+  const filtered = currentEndpoints.filter(ep => {
+    // Filtr kategorii
+    if (activeEndpointCategory === '200' && (ep.status < 200 || ep.status >= 300)) return false;
+    if (activeEndpointCategory === 'API' && ep.category !== 'API') return false;
+    if (activeEndpointCategory === 'Routing' && ep.category !== 'Routing') return false;
+    if (activeEndpointCategory === 'SEO' && ep.category !== 'SEO') return false;
+    if (activeEndpointCategory === 'Security' && ep.category !== 'Security') return false;
+
+    // Wyszukiwarka tekstowa
+    if (endpointSearchQuery) {
+      const matchPath = ep.path.toLowerCase().includes(endpointSearchQuery);
+      const matchCategory = ep.category.toLowerCase().includes(endpointSearchQuery);
+      const matchDesc = (ep.desc || '').toLowerCase().includes(endpointSearchQuery);
+      const matchStatus = String(ep.status).includes(endpointSearchQuery) || (ep.statusText || '').toLowerCase().includes(endpointSearchQuery);
+      if (!matchPath && !matchCategory && !matchDesc && !matchStatus) return false;
+    }
+
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    endpointsList.innerHTML = `
+      <div style="text-align: center; padding: 2rem 1rem; color: var(--zinc-500); font-size: 12px;">
+        Brak endpointów spełniających kryteria wyszukiwania.
+      </div>
+    `;
+    return;
+  }
+
+  filtered.forEach(ep => {
     endpointsList.appendChild(createEndpointRow(ep));
   });
 }
@@ -418,14 +494,24 @@ function createEndpointRow(ep) {
                      ep.status >= 400 ? 'badge-http-400' :
                      ep.status >= 300 ? 'badge-http-300' : 'badge-http-200';
 
+  const latencyColor = ep.latency < 50 ? 'var(--emerald-400)' : ep.latency < 120 ? 'var(--amber-400)' : 'var(--rose-400)';
+
   row.innerHTML = `
     <div class="endpoint-left">
       <span class="endpoint-path" title="${ep.fullUrl}">${ep.path}</span>
       <span class="endpoint-tag">${ep.category}</span>
+      ${ep.desc ? `<span class="endpoint-desc" title="${ep.desc}">${ep.desc}</span>` : ''}
     </div>
     <div class="endpoint-right">
-      <span class="endpoint-latency">${ep.latency} ms</span>
+      <span class="endpoint-latency" style="color: ${latencyColor};">⚡ ${ep.latency} ms</span>
       <span class="badge-http ${badgeClass}">${ep.status} ${ep.statusText}</span>
+      <a href="${ep.fullUrl}" target="_blank" rel="noopener noreferrer" class="endpoint-link" title="Otwórz URL w nowej karcie">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+      </a>
     </div>
   `;
   return row;
