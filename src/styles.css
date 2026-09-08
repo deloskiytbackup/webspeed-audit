@@ -680,6 +680,43 @@ header.site-header {
   margin-top: 0.15rem;
 }
 
+.endpoint-scan-status {
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.endpoint-scan-status.is-scanning {
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #93c5fd;
+}
+
+.endpoint-scan-status.is-finished {
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #6ee7b7;
+}
+
+.endpoint-scan-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: endpointSpin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes endpointSpin {
+  to { transform: rotate(360deg); }
+}
+
 .endpoint-controls {
   display: flex;
   flex-direction: column;

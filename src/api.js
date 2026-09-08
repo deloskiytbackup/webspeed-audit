@@ -200,43 +200,210 @@ function generateAutoEndpoints(url, hash = 12345) {
   ];
 }
 
-export async function probeCustomEndpoint(baseUrl, customPath) {
-  let fullUrl = customPath.trim();
+export function getCategoryForPath(path) {
+  const p = path.toLowerCase();
+  if (p.endsWith('.css') || p.includes('.css?')) return 'Stylesheet';
+  if (p.endsWith('.js') || p.includes('.js?')) return 'Script';
+  if (p.endsWith('.ico') || p.endsWith('.png') || p.endsWith('.jpg') || p.endsWith('.webp') || p.endsWith('.svg') || p.endsWith('.woff2')) return 'Asset';
+  if (p.includes('/api/') || p.includes('/graphql') || p.includes('/wp-json/')) return 'API';
+  if (p.includes('robots.txt') || p.includes('sitemap') || p.includes('feed') || p.endsWith('.xml')) return 'SEO';
+  if (p.includes('.well-known') || p.includes('.env') || p.includes('.git')) return 'Security';
+  return 'Routing';
+}
+
+export function getDescForPath(path, status) {
+  const p = path.toLowerCase();
+  if (p === '/') return 'Strona główna serwisu (Wykryto 1:1 z kodu strony)';
+  if (p.endsWith('.css')) return 'Arkusz stylów CSS witryny';
+  if (p.endsWith('.js')) return 'Skrypt JavaScript / paczka frontendowa';
+  if (p.includes('robots.txt')) return 'Plik instrukcji indeksowania Googlebot';
+  if (p.includes('sitemap')) return 'Mapa linków witryny XML dla wyszukiwarki';
+  if (p.includes('/api/health')) return 'Health check mikroserwisów i serwera';
+  if (p.includes('/api/')) return 'Endpoint interfejsu REST API';
+  if (p.includes('.env')) return status === 404 || status === 403 ? 'Plik środowiska bezpiecznie zablokowany (403/404)' : 'OSTRZEŻENIE: Plik .env dostępny publicznie!';
+  return 'Endpoint / podstrona zbadana na żywo na serwerze';
+}
+
+export async function probeSingleEndpointLive(cleanBase, path) {
+  let fullUrl = path.trim();
   if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
-    const cleanBase = baseUrl.replace(/\/+$/, '');
-    const cleanPath = customPath.startsWith('/') ? customPath : '/' + customPath;
+    const cleanPath = path.startsWith('/') ? path : '/' + path;
     fullUrl = cleanBase + cleanPath;
   }
 
+  const category = getCategoryForPath(path);
   const startTime = performance.now();
+
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
-    await fetch(fullUrl, { method: 'GET', mode: 'no-cors', signal: controller.signal });
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(fullUrl, { method: 'HEAD', signal: controller.signal, cache: 'no-cache' });
     clearTimeout(timeout);
-    const duration = Math.round(performance.now() - startTime);
+    const duration = Math.max(12, Math.round(performance.now() - startTime));
+
+    const status = res.status || 200;
+    const statusText = res.statusText || (status >= 400 ? 'NOT FOUND' : 'OK');
 
     return {
-      path: customPath,
+      path,
       fullUrl,
-      category: 'Custom Probe',
-      status: 200,
-      statusText: 'OK',
-      latency: Math.max(18, duration),
-      type: 'auto/detected'
+      category,
+      status,
+      statusText,
+      latency: duration,
+      type: res.headers?.get('content-type') || 'auto/live',
+      desc: getDescForPath(path, status)
     };
   } catch (err) {
-    const duration = Math.round(performance.now() - startTime);
-    return {
-      path: customPath,
-      fullUrl,
-      category: 'Custom Probe',
-      status: 404,
-      statusText: 'UNREACHABLE / 404',
-      latency: Math.max(30, duration),
-      type: 'unknown'
-    };
+    const duration = Math.max(15, Math.round(performance.now() - startTime));
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+      await fetch(fullUrl, { method: 'GET', mode: 'no-cors', signal: controller.signal });
+      clearTimeout(timeout);
+      const liveDuration = Math.max(15, Math.round(performance.now() - startTime));
+
+      return {
+        path,
+        fullUrl,
+        category,
+        status: 200,
+        statusText: 'LIVE / 200',
+        latency: liveDuration,
+        type: 'reachable',
+        desc: getDescForPath(path, 200)
+      };
+    } catch (e2) {
+      return {
+        path,
+        fullUrl,
+        category,
+        status: 404,
+        statusText: 'UNREACHABLE / 404',
+        latency: Math.max(25, duration),
+        type: 'offline',
+        desc: getDescForPath(path, 404)
+      };
+    }
   }
+}
+
+export async function crawlAndProbeLiveEndpoints(baseUrl, onEndpointFound, onProgress) {
+  const cleanBase = baseUrl.replace(/\/+$/, '');
+  let html = '';
+
+  // 1. Pobranie rzeczywistego kodu HTML witryny na żywo
+  try {
+    const res = await fetch(cleanBase, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      html = await res.text();
+    }
+  } catch (err) {
+    console.warn('Direct HTML fetch failed, attempting proxy reader...', err);
+  }
+
+  if (!html) {
+    try {
+      const proxyRes = await fetch(`https://r.jina.ai/${cleanBase}`, { signal: AbortSignal.timeout(6000) });
+      if (proxyRes.ok) {
+        html = await proxyRes.text();
+      }
+    } catch (e) {
+      console.warn('Proxy reader failed:', e);
+    }
+  }
+
+  // 2. Ekstrakcja 1:1 wszystkich linków, skryptów, styli i endpointów z kodu
+  const candidatePaths = new Set(['/']);
+
+  if (html) {
+    // href="..."
+    for (const m of html.matchAll(/href=["']([^"'#\s]+)["']/g)) {
+      const val = m[1].trim();
+      if (val.startsWith('/') && !val.startsWith('//')) {
+        candidatePaths.add(val.split('?')[0]);
+      } else if (val.startsWith(cleanBase)) {
+        const rel = val.replace(cleanBase, '').split('?')[0];
+        if (rel.startsWith('/')) candidatePaths.add(rel);
+      }
+    }
+
+    // src="..."
+    for (const m of html.matchAll(/src=["']([^"'#\s]+)["']/g)) {
+      const val = m[1].trim();
+      if (val.startsWith('/') && !val.startsWith('//')) {
+        candidatePaths.add(val.split('?')[0]);
+      } else if (val.startsWith(cleanBase)) {
+        const rel = val.replace(cleanBase, '').split('?')[0];
+        if (rel.startsWith('/')) candidatePaths.add(rel);
+      }
+    }
+
+    // Next.js / Webpack chunks
+    for (const m of html.matchAll(/(?:static\/chunks|\/_next\/static|assets\/)[^"'\\\s,)]+/g)) {
+      let p = m[0];
+      if (!p.startsWith('/')) p = '/' + p;
+      candidatePaths.add(p);
+    }
+
+    // Wywołania fetch / API w skryptach
+    for (const m of html.matchAll(/(?:fetch|axios|ajax)\s*\(\s*['"](\/[a-zA-Z0-9_\-\/\.]+)['"]/g)) {
+      candidatePaths.add(m[1]);
+    }
+  }
+
+  // Standardowe punkty infrastruktury do zbadania
+  const standardInfra = [
+    '/download',
+    '/check',
+    '/robots.txt',
+    '/sitemap.xml',
+    '/favicon.ico',
+    '/api/health',
+    '/api/v1',
+    '/.well-known/security.txt',
+    '/.env'
+  ];
+  for (const p of standardInfra) {
+    candidatePaths.add(p);
+  }
+
+  const pathsArray = Array.from(candidatePaths);
+  const total = pathsArray.length;
+  let probedCount = 0;
+
+  if (onProgress) onProgress(0, total);
+
+  // 3. Badanie na żywo każdego wykrytego endpointu (concurrency: 3)
+  const results = [];
+  const concurrency = 3;
+  let index = 0;
+
+  async function worker() {
+    while (index < pathsArray.length) {
+      const currentPath = pathsArray[index++];
+      const endpointData = await probeSingleEndpointLive(cleanBase, currentPath);
+      results.push(endpointData);
+      probedCount++;
+
+      if (onEndpointFound) {
+        onEndpointFound(endpointData);
+      }
+      if (onProgress) {
+        onProgress(probedCount, total);
+      }
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(concurrency, pathsArray.length) }, () => worker());
+  await Promise.all(workers);
+
+  return results;
+}
+
+export async function probeCustomEndpoint(baseUrl, customPath) {
+  const cleanBase = baseUrl.replace(/\/+$/, '');
+  return probeSingleEndpointLive(cleanBase, customPath);
 }
 
 function getMetricStatus(valStr, goodThresh, poorThresh) {

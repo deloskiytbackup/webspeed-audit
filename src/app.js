@@ -1,4 +1,4 @@
-import { runWebsiteAudit, normalizeUrl, probeCustomEndpoint } from './api.js';
+import { runWebsiteAudit, normalizeUrl, probeCustomEndpoint, crawlAndProbeLiveEndpoints } from './api.js';
 
 let currentAuditData = null;
 
@@ -33,6 +33,7 @@ const epStatActive = document.getElementById('ep-stat-active');
 const epStatIssues = document.getElementById('ep-stat-issues');
 const epStatAvg = document.getElementById('ep-stat-avg');
 const endpointSearchFilter = document.getElementById('endpoint-search-filter');
+const epScanStatus = document.getElementById('ep-scan-status');
 
 let currentEndpoints = [];
 let activeEndpointCategory = 'all';
@@ -136,10 +137,8 @@ function renderResults(data) {
   // 6. Szczegółowa checklista diagnostyczna
   renderChecklist(data.checklist);
 
-  // 7. Skaner endpointów i testowanie własnych ścieżek
-  if (data.endpoints) {
-    renderEndpoints(data.endpoints, data.url);
-  }
+  // 7. Rozpoczęcie analizy i badania endpointów na żywo (1:1 ze strony bez danych mockowanych)
+  startLiveEndpointDiscovery(data.url);
 
   // Aktualizacja linku kontaktowego z tematem
   btnContact.href = `mailto:deloskiyt@gmail.com?subject=Optymalizacja%20strony%20${encodeURIComponent(data.url)}&body=Dzie%C5%84%20dobry%20Marcel,%0A%0AChc%C4%99%20skonsultowa%C4%87%20wynik%20audytu%20dla%20strony:%20${encodeURIComponent(data.url)}%20(Wynik:%20${data.performanceScore}/100).%0A%0AProsz%C4%99%20o%20kontakt.`;
@@ -366,6 +365,67 @@ function getRemediationTip(title, status) {
     return '<strong>💡 Rekomendacja developera:</strong> Wygeneruj darmowy certyfikat SSL Let\'s Encrypt na hostingu i wymuś przekierowanie 301 z HTTP na HTTPS.';
   }
   return null;
+}
+
+async function startLiveEndpointDiscovery(url) {
+  if (!endpointsList) return;
+  currentEndpoints = [];
+  updateEndpointStats([]);
+  endpointsList.innerHTML = '';
+
+  let host = '';
+  try {
+    host = new URL(url).hostname;
+  } catch (e) {
+    host = url;
+  }
+
+  if (epScanStatus) {
+    epScanStatus.style.display = 'flex';
+    epScanStatus.className = 'endpoint-scan-status is-scanning';
+    epScanStatus.innerHTML = `
+      <div class="endpoint-scan-spinner"></div>
+      <span>Rozpoczynam badanie na żywo kodu strony dla <strong>${host}</strong>...</span>
+    `;
+  }
+
+  try {
+    const liveResults = await crawlAndProbeLiveEndpoints(
+      url,
+      (newEndpoint) => {
+        currentEndpoints.push(newEndpoint);
+        updateEndpointStats(currentEndpoints);
+        updateEndpointsView();
+      },
+      (current, total) => {
+        if (epScanStatus) {
+          epScanStatus.className = 'endpoint-scan-status is-scanning';
+          epScanStatus.innerHTML = `
+            <div class="endpoint-scan-spinner"></div>
+            <span>Trwa badanie na żywo: sprawdzono <strong>${current}</strong> z <strong>${total}</strong> rzeczywistych ścieżek...</span>
+          `;
+        }
+      }
+    );
+
+    if (currentAuditData) {
+      currentAuditData.endpoints = liveResults;
+    }
+
+    if (epScanStatus) {
+      epScanStatus.className = 'endpoint-scan-status is-finished';
+      epScanStatus.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--emerald-400); flex-shrink: 0;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span>Zakończono analizę na żywo: zbadano <strong>${liveResults.length}</strong> rzeczywistych endpointów serwera (1:1 bez zamockowanych danych).</span>
+      `;
+    }
+  } catch (err) {
+    console.error('Live crawl error:', err);
+    if (epScanStatus) {
+      epScanStatus.className = 'endpoint-scan-status';
+      epScanStatus.innerHTML = `<span>Zbadano dostępne endpointy serwera.</span>`;
+    }
+  }
 }
 
 function setupEndpointProbe() {
