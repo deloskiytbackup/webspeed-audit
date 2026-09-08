@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebSpeed.eu — Błyskawiczny Audyt Stron WWW, Core Web Vitals & SEO</title>
-  <meta name="description" content="Niezależne narzędzie do analizy szybkości stron internetowych, Google Core Web Vitals (LCP, FCP, CLS, TTFB) oraz optymalizacji SEO.">
+  <title>WebSpeed.eu — Zaawansowany Audyt Stron WWW, Core Web Vitals & SEO</title>
+  <meta name="description" content="Niezależne narzędzie do audytu szybkości stron internetowych, Google Core Web Vitals (LCP, FCP, CLS, TTFB, TBT), wagi zasobów i optymalizacji SEO.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
   <style>
 :root {
@@ -211,7 +211,7 @@ header.site-header {
 .hero-subtitle {
   font-size: 0.875rem;
   color: var(--zinc-400);
-  max-width: 580px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
@@ -498,6 +498,54 @@ header.site-header {
   word-break: break-all;
 }
 
+/* 4 Pillars Score Grid */
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .pillars-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.pillar-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  text-align: center;
+}
+
+.pillar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--zinc-400);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pillar-val {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.pillar-val span {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--zinc-500);
+  margin-left: 2px;
+}
+
+.score-green { color: var(--emerald-400); }
+.score-amber { color: var(--amber-400); }
+.score-rose { color: var(--rose-400); }
+
 /* Section headings */
 .section-heading {
   display: flex;
@@ -522,7 +570,7 @@ header.site-header {
   color: var(--zinc-500);
 }
 
-/* Metrics Grid (Core Web Vitals) */
+/* Metrics Grid (Core Web Vitals - 6 cards) */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -563,13 +611,199 @@ header.site-header {
 }
 
 .metric-val {
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   margin-bottom: 0.25rem;
 }
 
 .metric-desc {
+  font-size: 11px;
+  color: var(--zinc-500);
+}
+
+/* Resource breakdown */
+.resources-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.res-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--zinc-400);
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.res-total-val {
+  color: #ffffff;
+  font-weight: 700;
+  margin-left: 0.35rem;
+}
+
+.res-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #121319;
+  margin-bottom: 1rem;
+}
+
+.res-bar-segment {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.res-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.65rem;
+}
+
+.res-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.65rem;
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+}
+
+.res-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.res-color-badge {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.res-name {
+  color: var(--zinc-300);
+  font-weight: 500;
+}
+
+.res-size {
+  color: var(--zinc-400);
+  margin-right: 0.4rem;
+}
+
+.res-pct {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Waterfall Timeline */
+.timeline-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-row {
+  margin-bottom: 0.85rem;
+}
+
+.timeline-row:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--zinc-300);
+  margin-bottom: 0.35rem;
+}
+
+.timeline-time {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.timeline-track {
+  height: 6px;
+  background-color: #121319;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.timeline-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+  border-radius: 999px;
+}
+
+/* Business Impact & ROI */
+.biz-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .biz-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.biz-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+}
+
+.biz-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--zinc-400);
+  margin-bottom: 0.35rem;
+}
+
+.biz-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.25rem;
+}
+
+.text-rose { color: var(--rose-400); }
+.text-emerald { color: var(--emerald-400); }
+
+.biz-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--emerald-400);
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.biz-desc {
   font-size: 11px;
   color: var(--zinc-500);
 }
@@ -625,11 +859,32 @@ header.site-header {
   border: 1px solid rgba(244, 63, 94, 0.25);
 }
 
+.check-content {
+  flex: 1;
+}
+
+.check-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.15rem;
+}
+
 .check-content h4 {
   font-size: 0.875rem;
   font-weight: 600;
   color: #ffffff;
-  margin-bottom: 0.15rem;
+}
+
+.check-category {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--zinc-500);
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
 }
 
 .check-content p {
@@ -769,7 +1024,7 @@ footer.site-footer {
     <section class="hero">
       <h1 class="hero-title">Sprawdź wydajność i szybkość strony</h1>
       <p class="hero-subtitle">
-        Błyskawiczna analiza Core Web Vitals, diagnostyka Google PageSpeed oraz techniczne zalecenia SEO.
+        Profesjonalna analiza Core Web Vitals, transferu zasobów, osi czasu renderowania oraz optymalizacji SEO.
       </p>
     </section>
 
@@ -811,8 +1066,8 @@ footer.site-footer {
     <!-- Stan ładowania -->
     <div id="loading-box" class="loading-box">
       <div class="spinner"></div>
-      <div class="loading-text">Pobieranie metryk Core Web Vitals...</div>
-      <div class="loading-sub">Analiza LCP, FCP, CLS, TTFB, zasobów CSS/JS oraz indeksacji SEO.</div>
+      <div class="loading-text">Pobieranie szczegółowych metryk wydajności...</div>
+      <div class="loading-sub">Analiza LCP, FCP, CLS, TTFB, TBT, transferu grafik, CSS, JS oraz audyt techniczny SEO.</div>
     </div>
 
     <!-- Kontener wyników -->
@@ -830,16 +1085,31 @@ footer.site-footer {
           </div>
 
           <div class="overview-content">
-            <h3>Podsumowanie audytu wydajności</h3>
+            <h3>Wynik Ogólny Optymalizacji</h3>
             <p>
-              Strona została przetestowana pod kątem szybkości ładowania, optymalizacji zasobów oraz wskaźników stabilności wizualnej Google UX.
+              Strona została przetestowana pod kątem szybkości renderowania na urządzeniach mobilnych, wag zasobów oraz stabilności wizualnej Google UX.
             </p>
             <div id="target-url-badge" class="target-url-badge">https://example.com</div>
           </div>
         </div>
       </div>
 
-      <!-- Kafelki metryk Core Web Vitals -->
+      <!-- 4 Główne Filary Audytu (Pillars Grid) -->
+      <div class="section-heading">
+        <h2 class="section-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          Główne obszary audytu technicznego
+        </h2>
+        <span class="section-badge">Skala 0-100</span>
+      </div>
+      <div id="pillars-container" class="pillars-grid"></div>
+
+      <!-- Kafelki metryk Core Web Vitals (6 metryk) -->
       <div class="section-heading">
         <h2 class="section-title">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -847,38 +1117,75 @@ footer.site-footer {
             <line x1="12" y1="20" x2="12" y2="4"></line>
             <line x1="6" y1="20" x2="6" y2="14"></line>
           </svg>
-          Wskaźniki Core Web Vitals
+          Kluczowe wskaźniki Core Web Vitals
         </h2>
-        <span class="section-badge">Wydajność Google</span>
+        <span class="section-badge">Standard Google UX</span>
       </div>
       <div id="metrics-grid" class="metrics-grid"></div>
+
+      <!-- Waga strony i podział zasobów -->
+      <div class="section-heading">
+        <h2 class="section-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          </svg>
+          Waga strony i transfer zasobów
+        </h2>
+        <span class="section-badge">Struktura danych</span>
+      </div>
+      <div id="resources-container" class="resources-card"></div>
+
+      <!-- Oś czasu ładowania (Waterfall) -->
+      <div class="section-heading">
+        <h2 class="section-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Oś czasu renderowania (Waterfall Timeline)
+        </h2>
+        <span class="section-badge">Kolejność zdarzeń</span>
+      </div>
+      <div id="timeline-container"></div>
+
+      <!-- Wpływ na biznes i konwersję (ROI Impact) -->
+      <div class="section-heading">
+        <h2 class="section-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          Wpływ szybkości na konwersję i sprzedaż
+        </h2>
+        <span class="section-badge">Biznes & ROI</span>
+      </div>
+      <div id="business-container"></div>
 
       <!-- Diagnostyka techniczna i zalecenia -->
       <div class="section-heading">
         <h2 class="section-title">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
           </svg>
-          Diagnostyka techniczna i zalecenia SEO
+          Szczegółowa checklista techniczna & SEO
         </h2>
-        <span class="section-badge">Audyt kodu</span>
+        <span class="section-badge">10 testów diagnostycznych</span>
       </div>
       <div id="checklist-container" class="checklist-card"></div>
 
       <!-- Lead Generation Pitch Box -->
       <div class="lead-card">
-        <h3>Twoja witryna może działać znacznie szybciej</h3>
+        <h3>Potrzebujesz przyspieszyć swoją witrynę?</h3>
         <p>
-          Optymalizacja skryptów, konwersja obrazów do nowoczesnych formatów oraz konfiguracja cache serwera potrafią skrócić czas ładowania nawet o 70%.
+          Optymalizacja kodu, kompresja grafik do formatu WebP, eliminacja skryptów blokujących i konfiguracja cache potrafią skrócić czas ładowania nawet o 70% i podnieść wynik w Google do 90+.
         </p>
         <div class="lead-actions">
           <a id="btn-contact" href="mailto:deloskiyt@gmail.com" class="clean-button">
             Skontaktuj się ze mną
           </a>
           <button type="button" id="btn-export" class="clean-button-secondary">
-            Pobierz raport (.MD)
+            Pobierz pełny raport (.MD)
           </button>
         </div>
       </div>

@@ -202,7 +202,7 @@ header.site-header {
 .hero-subtitle {
   font-size: 0.875rem;
   color: var(--zinc-400);
-  max-width: 580px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
@@ -289,11 +289,6 @@ header.site-header {
 
 .clean-button:hover {
   background-color: var(--primary-btn-hover);
-}
-
-.clean-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .clean-button-secondary {
@@ -489,6 +484,54 @@ header.site-header {
   word-break: break-all;
 }
 
+/* 4 Pillars Score Grid */
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .pillars-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.pillar-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  text-align: center;
+}
+
+.pillar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--zinc-400);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pillar-val {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.pillar-val span {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--zinc-500);
+  margin-left: 2px;
+}
+
+.score-green { color: var(--emerald-400); }
+.score-amber { color: var(--amber-400); }
+.score-rose { color: var(--rose-400); }
+
 /* Section headings */
 .section-heading {
   display: flex;
@@ -513,7 +556,7 @@ header.site-header {
   color: var(--zinc-500);
 }
 
-/* Metrics Grid (Core Web Vitals) */
+/* Metrics Grid (Core Web Vitals - 6 cards) */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -554,13 +597,199 @@ header.site-header {
 }
 
 .metric-val {
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   margin-bottom: 0.25rem;
 }
 
 .metric-desc {
+  font-size: 11px;
+  color: var(--zinc-500);
+}
+
+/* Resource breakdown */
+.resources-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.res-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--zinc-400);
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.res-total-val {
+  color: #ffffff;
+  font-weight: 700;
+  margin-left: 0.35rem;
+}
+
+.res-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #121319;
+  margin-bottom: 1rem;
+}
+
+.res-bar-segment {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.res-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.65rem;
+}
+
+.res-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.65rem;
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+}
+
+.res-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.res-color-badge {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.res-name {
+  color: var(--zinc-300);
+  font-weight: 500;
+}
+
+.res-size {
+  color: var(--zinc-400);
+  margin-right: 0.4rem;
+}
+
+.res-pct {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Waterfall Timeline */
+.timeline-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-row {
+  margin-bottom: 0.85rem;
+}
+
+.timeline-row:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--zinc-300);
+  margin-bottom: 0.35rem;
+}
+
+.timeline-time {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.timeline-track {
+  height: 6px;
+  background-color: #121319;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.timeline-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+  border-radius: 999px;
+}
+
+/* Business Impact & ROI */
+.biz-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .biz-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.biz-card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+}
+
+.biz-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--zinc-400);
+  margin-bottom: 0.35rem;
+}
+
+.biz-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.25rem;
+}
+
+.text-rose { color: var(--rose-400); }
+.text-emerald { color: var(--emerald-400); }
+
+.biz-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--emerald-400);
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.biz-desc {
   font-size: 11px;
   color: var(--zinc-500);
 }
@@ -616,11 +845,32 @@ header.site-header {
   border: 1px solid rgba(244, 63, 94, 0.25);
 }
 
+.check-content {
+  flex: 1;
+}
+
+.check-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.15rem;
+}
+
 .check-content h4 {
   font-size: 0.875rem;
   font-weight: 600;
   color: #ffffff;
-  margin-bottom: 0.15rem;
+}
+
+.check-category {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--zinc-500);
+  background-color: #121319;
+  border: 1px solid var(--card-border);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
 }
 
 .check-content p {
